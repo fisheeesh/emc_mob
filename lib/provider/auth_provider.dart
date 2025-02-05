@@ -85,21 +85,16 @@ class AuthProvider extends ChangeNotifier {
       debugPrint("Request Headers: $headers");
 
       /// Allow self-signed certificates during development (ONLY FOR DEVELOPMENT)
-      // @TODO: We will implement with another way in production
       HttpClient httpClient = HttpClient()
-        ..badCertificateCallback =
-            (X509Certificate cert, String host, int port) => true;
+        ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
       IOClient ioClient = IOClient(httpClient);
 
-      /// Handles cases like server errors, crashes.
-      /// Uses a timeout to avoid indefinite waiting for the server response.
-      // final res = await http.post(Uri.parse(ETexts.AUTHORIZATION_ENDPOINT),
-      //   headers: headers,).timeout(const Duration(seconds: 30));
       final response = await ioClient
           .post(
         Uri.parse(ETexts.AUTHORIZATION_ENDPOINT),
         headers: headers,
-      ).timeout(const Duration(seconds: 30));
+      )
+          .timeout(const Duration(seconds: 30));
 
       debugPrint('Response: ${response.body}');
 
@@ -109,12 +104,9 @@ class AuthProvider extends ChangeNotifier {
 
         if (authToken != null && refreshToken != null) {
           await saveTokens(authToken, refreshToken);
-
-          /// Decode and store the email
           _decodeEmailFromToken(authToken);
           debugPrint("Tokens saved successfully.");
         }
-
         return true;
       } else {
         debugPrint("Authorization Failed: ${response.body}");
@@ -127,8 +119,26 @@ class AuthProvider extends ChangeNotifier {
         ETexts.REQ_TIME_OUT,
       );
       return false;
+    } on SocketException {
+      debugPrint("Server Unreachable: Could not connect to the server.");
+      EHelperFunctions.showSnackBar(
+        context,
+        "Server is unreachable. Please check your connection.",
+      );
+      return false;
+    } on http.ClientException {
+      debugPrint("Client Exception: The request failed.");
+      EHelperFunctions.showSnackBar(
+        context,
+        "Failed to reach the server. Please try again later.",
+      );
+      return false;
     } catch (e) {
-      debugPrint("Error sending access token to server: $e");
+      debugPrint("Unexpected Error: $e");
+      EHelperFunctions.showSnackBar(
+        context,
+        ETexts.REQ_TIME_OUT,
+      );
       return false;
     }
   }
@@ -173,7 +183,9 @@ class AuthProvider extends ChangeNotifier {
 
   /// Clears all tokens from storage
   Future<void> clearTokens() async {
-    await _storage.deleteAll();
+    await _storage.delete(key: ETokens.authToken.name);
+    await _storage.delete(key: ETokens.refreshToken.name);
+    await _storage.delete(key: ETokens.userName.name);
   }
 
   /// Restore email from stored token every time user log in

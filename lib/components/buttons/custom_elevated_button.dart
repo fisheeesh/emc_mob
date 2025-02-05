@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomElevatedButton extends StatelessWidget {
-  CustomElevatedButton({
+  const CustomElevatedButton({
     super.key,
     required this.onPressed,
     required this.placeholder,

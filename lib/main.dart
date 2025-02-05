@@ -1,6 +1,6 @@
-import 'package:emotion_check_in_app/enums/tokens.dart';
 import 'package:emotion_check_in_app/provider/auth_provider.dart';
 import 'package:emotion_check_in_app/provider/emotion_check_in_provider.dart';
+import 'package:emotion_check_in_app/provider/login_provider.dart';
 import 'package:emotion_check_in_app/screens/auth/login_screen.dart';
 import 'package:emotion_check_in_app/screens/main/home_screen.dart';
 import 'package:emotion_check_in_app/screens/onBoard/on_boarding_screen.dart';
@@ -12,40 +12,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Server as global variable, so they can be access anywhere in this file.
 int? isViewed;
-String? token;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   SharedPreferences prefs = await SharedPreferences.getInstance();
   isViewed = prefs.getInt('onBoard');
 
   final storage = const FlutterSecureStorage();
   final authProvider = AuthProvider();
+  final loginProvider = LoginProvider();
 
-  /// Fetch the refresh token and restore the user's name
-  token = await storage.read(key: ETokens.refreshToken.name);
-  if (token != null && authProvider.isTokenValid(token)) {
-    await authProvider.restoreUserName();
-    debugPrint('Token is not expired yet 😉.');
-  }
-  else{
-    debugPrint('Token is already Expired. Please Logged in again.');
-  }
+  bool isUserLoggedIn = await loginProvider.restoreSession();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => authProvider),
-        ChangeNotifierProvider(create: (_) => EmotionCheckInProvider())
+        ChangeNotifierProvider(create: (_) => loginProvider),
+        ChangeNotifierProvider(create: (_) => EmotionCheckInProvider()),
       ],
-      child: const MyApp(),
+      child: MyApp(isUserLoggedIn: isUserLoggedIn),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isUserLoggedIn;
+  const MyApp({super.key, required this.isUserLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -53,15 +46,7 @@ class MyApp extends StatelessWidget {
       title: 'ATA - Emotion Check-in Application',
       theme: EAppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) {
-          return isViewed != 0
-              ? const OnBoardingScreen()
-              : authProvider.isTokenValid(token)
-              ? const HomeScreen()
-              : const LoginScreen();
-        },
-      ),
+      home: isViewed != 0 ? OnBoardingScreen() :  isUserLoggedIn ? const HomeScreen() : const LoginScreen(),
     );
   }
 }

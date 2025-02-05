@@ -1,16 +1,16 @@
 import 'package:emotion_check_in_app/components/buttons/custom_button.dart';
 import 'package:emotion_check_in_app/components/formFields/custom_text_form_field.dart';
-import 'package:emotion_check_in_app/components/buttons/custom_outlined_button.dart';
-import 'package:emotion_check_in_app/provider/auth_provider.dart';
+import 'package:emotion_check_in_app/provider/login_provider.dart';
+import 'package:emotion_check_in_app/screens/main/home_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/colors.dart';
 import 'package:emotion_check_in_app/utils/constants/image_strings.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
+import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:emotion_check_in_app/utils/validator/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:emotion_check_in_app/utils/theme/text_theme.dart';
 import 'package:emotion_check_in_app/utils/constants/sizes.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,57 +23,42 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  late SharedPreferences prefs;
 
   bool _isPasswordVisible = false;
-  bool _isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    initSharePref();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-  }
-
-  void initSharePref() async {
-    prefs = await SharedPreferences.getInstance();
-  }
-
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
-      try {
-        _formKey.currentState!.save();
-        debugPrint('Success');
-      } catch (e) {
-        debugPrint("Login Error: $e");
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
+      final loginProvider = context.read<LoginProvider>();
+
+      bool success = await loginProvider.login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      if (success) {
+        debugPrint("Login Successful!");
+        EHelperFunctions.navigateToScreen(context, HomeScreen());
+      } else {
+        debugPrint("Login Failed!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid credentials. Please try again.")),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isGoogleLoading = context.watch<AuthProvider>().isLoading;
+    final loginProvider = context.watch<LoginProvider>();
+    final bool isLoading = loginProvider.isLoading;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Stack(
-          children: [
-            Center(
+    return Stack(
+      children: [
+        Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Center(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: ESizes.md),
                 width: double.infinity,
@@ -111,9 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           validator: EValidator.validatePassword,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _isPasswordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
+                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                             ),
                             onPressed: () {
                               setState(() {
@@ -129,88 +112,36 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 10),
 
                         /// Login Button
-                        _loginButton(),
-                        const SizedBox(height: 20),
-
-                        /// Google Login Button
-                        _googleLoginButton(isGoogleLoading, context),
+                        CustomButton(
+                          width: ESizes.wFull,
+                          height: ESizes.hNormal,
+                          onPressed: isLoading ? null : _handleLogin,
+                          child: Text(
+                            ETexts.LOGIN,
+                            style: ETextTheme.lightTextTheme.titleLarge,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
               ),
             ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
 
-  CustomOutlinedButton _googleLoginButton(
-      bool isGoogleLoading, BuildContext context) {
-    return CustomOutlinedButton(
-      width: double.infinity,
-      height: 55,
-      borderColor: EColors.primary,
-      onPressed: isGoogleLoading
-          ? null
-          : () async {
-              await context.read<AuthProvider>().loginAndAuthorize(context);
-            },
-      child: isGoogleLoading
-          ? const SizedBox(
-              width: ESizes.wXs,
-              height: ESizes.hXs,
+        /// **Full-Screen Loading Overlay**
+        if (isLoading)
+          Container(
+            color: Colors.black.withOpacity(0.5),
+            child: const Center(
               child: CircularProgressIndicator(
                 color: EColors.primary,
-                strokeWidth: 2.0,
+                strokeWidth: 3.0,
               ),
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  EImages.googleLogo,
-                  height: ESizes.hXs,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  ETexts.GOOGLE,
-                  style: ETextTheme.lightTextTheme.titleMedium,
-                ),
-              ],
             ),
-    );
-  }
-
-  CustomButton _loginButton() {
-    return CustomButton(
-      width: ESizes.wFull,
-      height: ESizes.hNormal,
-      onPressed: _isLoading ? null : _handleLogin,
-      child: _isLoading
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(
-                  width: ESizes.wXs,
-                  height: ESizes.hXs,
-                  child: CircularProgressIndicator(
-                    color: EColors.white,
-                    strokeWidth: 2.0,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  ETexts.PROCESSING,
-                  style: ETextTheme.lightTextTheme.titleLarge,
-                ),
-              ],
-            )
-          : Text(
-              ETexts.LOGIN,
-              style: ETextTheme.lightTextTheme.titleLarge,
-            ),
+          ),
+      ],
     );
   }
 

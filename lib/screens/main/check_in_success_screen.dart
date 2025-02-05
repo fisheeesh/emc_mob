@@ -15,13 +15,13 @@ class CheckInSuccessScreen extends StatelessWidget {
   final String feeling;
 
   const CheckInSuccessScreen({
-    Key? key,
+    super.key,
     required this.userName,
     required this.checkInTime,
     required this.emoji,
     required this.label,
     required this.feeling,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

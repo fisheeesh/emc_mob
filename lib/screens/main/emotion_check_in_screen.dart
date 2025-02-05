@@ -15,10 +15,10 @@ class EmotionCheckInScreen extends StatefulWidget {
   final DateTime checkInTime;
 
   const EmotionCheckInScreen({
-    Key? key,
+    super.key,
     required this.userName,
     required this.checkInTime,
-  }) : super(key: key);
+  });
 
   @override
   State<EmotionCheckInScreen> createState() => _EmotionCheckInScreenState();

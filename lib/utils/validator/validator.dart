@@ -1,9 +1,9 @@
 class EValidator{
-  static String? validateEmail(String? value){
-    if(value == null || value.isEmpty){
+  static String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
       return 'Email is required.';
     }
-    if(!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)){
+    if (!RegExp(r'^[\w-\.]+@ata-it-th\.com$').hasMatch(value)) {
       return 'Invalid email address.';
     }
     return null;

@@ -10,7 +10,6 @@ import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:emotion_check_in_app/utils/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -25,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
 
+  /// Greet to users according to time zone
   String _getGreetingMessage() {
     final hour = DateTime.now().hour;
 
@@ -160,6 +160,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _calendarSection(EmotionCheckInProvider checkInProvider) {
     final checkInList = checkInProvider.checkInList;
 
+    /// Creates a map of check-in dates and their corresponding check-in types
+    /// This ensures to highlight check-ins in calendar
+    /// Allows to retrieve check-in type for a specific day
+    /// Help to filter check-ins by month
     Map<DateTime, CheckInType> checkInTypeMap = {
       for (var checkIn in checkInList)
         DateTime(checkIn.checkInTime.year, checkIn.checkInTime.month,
@@ -202,6 +206,8 @@ class _HomeScreenState extends State<HomeScreen> {
             rightChevronIcon: Icon(Icons.chevron_right, color: EColors.dark),
           ),
           calendarStyle: CalendarStyle(
+            /// Remove the days from other month
+            outsideDaysVisible: false,
             defaultTextStyle: const TextStyle(color: EColors.dark),
             weekendTextStyle: const TextStyle(color: EColors.dark),
             todayDecoration: BoxDecoration(),
@@ -224,7 +230,6 @@ class _HomeScreenState extends State<HomeScreen> {
           calendarBuilders: CalendarBuilders(
             defaultBuilder: (context, day, focusedDay) {
               /// Always set the day text color to black
-              /// @TODO: will modify later
               return Center(
                 child: Text(
                   '${day.day}',
@@ -321,11 +326,11 @@ class _HomeScreenState extends State<HomeScreen> {
   OutlinedButton _logOutButton(BuildContext context) {
     return OutlinedButton(
       onPressed: () async {
-        // Show confirmation dialog
+        /// Show confirmation dialog
         final shouldLogout = await _showLogoutConfirmationDialog(context);
 
         if (shouldLogout) {
-          // Handle logout
+          /// Handle logout
           await context.read<AuthProvider>().logout(context);
         }
       },

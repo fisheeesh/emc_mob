@@ -47,6 +47,9 @@ class EmotionCheckInProvider with ChangeNotifier {
 
   List<EmotionCheckIn> get checkInList => _checkInList;
 
+  /// Retrieves today's check-in by searching for a matching date in the check-in list.
+  /// Uses firstWhere() to find the first matching check-in.
+  /// If no match is found, orElse ensures null is returned instead of throwing an error.
   EmotionCheckIn? get todayCheckIn {
     final today = DateTime.now();
     return _checkInList.cast<EmotionCheckIn?>().firstWhere(
@@ -76,22 +79,19 @@ class EmotionCheckInProvider with ChangeNotifier {
 
   /// Get a check-in data for a specific date
   EmotionCheckIn? getCheckInByDate(DateTime date) {
-    try {
-      return _checkInList.firstWhere(
-            (checkIn) =>
-        checkIn.checkInTime.year == date.year &&
-            checkIn.checkInTime.month == date.month &&
-            checkIn.checkInTime.day == date.day,
-      );
-    } catch (e) {
-      return null;
-    }
+    return _checkInList.cast<EmotionCheckIn?>().firstWhere(
+          (checkIn) =>
+      checkIn!.checkInTime.day == date.day &&
+          checkIn.checkInTime.month == date.month &&
+          checkIn.checkInTime.year == date.year,
+      orElse: () => null,
+    );
   }
 
   /// Determine if the check-in is on time or late
   CheckInType _determineCheckInType(DateTime checkInTime) {
     final today = DateTime(checkInTime.year, checkInTime.month, checkInTime.day);
-    final onTimeEnd = DateTime(today.year, today.month, today.day, 9, 30); // 9:30 AM
+    final onTimeEnd = DateTime(today.year, today.month, today.day, 9, 30);
     return checkInTime.isBefore(onTimeEnd) ? CheckInType.onTime : CheckInType.late;
   }
 }
