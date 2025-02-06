@@ -17,9 +17,9 @@ void main() async {
 
   final loginProvider = LoginProvider();
 
-  /// **Check if user session is valid & restore username**
+  /// Check if user session is valid & restore username
   bool isUserLoggedIn = await loginProvider.ensureValidToken();
-  await loginProvider.restoreUserName(); // ✅ Restore username
+  await loginProvider.restoreUserName();
 
   runApp(
     MultiProvider(

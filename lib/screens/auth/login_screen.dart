@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState?.validate() ?? false) {
       final loginProvider = context.read<LoginProvider>();
 
-      bool success = await loginProvider.login(
+      bool success = await loginProvider.loginWithEmailAndPassword(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 10),
 
                         /// Forgot Password
-                        _forgotPasswordSection(),
+                        // _forgotPasswordSection(),
                         const SizedBox(height: 10),
 
                         /// Login Button
