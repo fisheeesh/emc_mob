@@ -4,6 +4,7 @@ import 'package:emotion_check_in_app/enums/tokens.dart';
 import 'package:emotion_check_in_app/screens/auth/login_screen.dart';
 import 'package:emotion_check_in_app/screens/main/home_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
+import 'package:emotion_check_in_app/utils/constants/urls.dart';
 import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -81,7 +82,7 @@ class AuthProvider extends ChangeNotifier {
         'Token': 'Bearer $accessToken',
       };
 
-      debugPrint("Requesting to URL: ${ETexts.AUTHORIZATION_ENDPOINT_ANDROID}");
+      debugPrint("Requesting to URL: ${EUrls.AUTHORIZATION_ENDPOINT_ANDROID}");
       debugPrint("Request Headers: $headers");
 
       /// Allow self-signed certificates during development (ONLY FOR DEVELOPMENT)
@@ -91,7 +92,7 @@ class AuthProvider extends ChangeNotifier {
 
       final response = await ioClient
           .post(
-        Uri.parse(ETexts.AUTHORIZATION_ENDPOINT_ANDROID),
+        Uri.parse(EUrls.AUTHORIZATION_ENDPOINT_ANDROID),
         headers: headers,
       )
           .timeout(const Duration(seconds: 30));

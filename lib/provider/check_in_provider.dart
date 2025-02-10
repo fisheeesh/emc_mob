@@ -4,6 +4,7 @@ import 'package:emotion_check_in_app/database/database_helper.dart';
 import 'package:emotion_check_in_app/enums/tokens.dart';
 import 'package:emotion_check_in_app/provider/login_provider.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
+import 'package:emotion_check_in_app/utils/constants/urls.dart';
 import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -128,7 +129,7 @@ class CheckInProvider with ChangeNotifier {
   /// - Retrieves check-ins from the server.
   /// - Saves them to SQLite for offline access.
   Future<void> fetchCheckIns() async {
-    final endpoint = EHelperFunctions.isIOS() ? ETexts.HISTORY_ENDPOINT_IOS : ETexts.HISTORY_ENDPOINT_ANDROID;
+    final endpoint = EHelperFunctions.isIOS() ? EUrls.HISTORY_ENDPOINT_IOS : EUrls.HISTORY_ENDPOINT_ANDROID;
     final response = await _makeAuthorizedRequest(method: "GET", endpoint: endpoint);
 
     if (response != null && response.statusCode == 200) {
@@ -165,7 +166,7 @@ class CheckInProvider with ChangeNotifier {
   /// - `feelingText`: The text description of the mood.
   Future<void> sendCheckIn(BuildContext context, String emoji, String feelingText) async {
     String moodMessage = "$emoji $feelingText";
-    final endpoint = EHelperFunctions.isIOS() ? ETexts.CHECK_IN_ENDPOINT_IOS : ETexts.CHECK_IN_ENDPOINT_ANDROID;
+    final endpoint = EHelperFunctions.isIOS() ? EUrls.CHECK_IN_ENDPOINT_IOS : EUrls.CHECK_IN_ENDPOINT_ANDROID;
 
     final response = await _makeAuthorizedRequest(method: "POST", endpoint: endpoint, body: {"moodMessage": moodMessage});
 

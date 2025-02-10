@@ -89,11 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: checkInProvider.todayCheckIn != null
             ? null
             : () {
-                EHelperFunctions.navigateToScreen(
-                    context,
-                    EmotionCheckInScreen(
-                      userName: userName,
-                    ));
+               Navigator.push(context, MaterialPageRoute(builder: (context) => EmotionCheckInScreen(userName: userName)));
               },
         placeholder: Text(
           ETexts.CHECK_IN,
@@ -177,10 +173,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _calendarSection(CheckInProvider checkInProvider) {
     final checkInList = checkInProvider.checkIns;
 
-    /// Creates a map of check-in dates and their corresponding check-in types
-    /// This ensures to highlight check-ins in calendar
-    /// Allows to retrieve check-in type for a specific day
-    /// Help to filter check-ins by month
     Map<DateTime, Color> checkInTypeMap = {
       for (var checkIn in checkInList)
         DateTime(checkIn.timestamp.year, checkIn.timestamp.month,

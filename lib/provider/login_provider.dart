@@ -5,6 +5,7 @@ import 'package:emotion_check_in_app/enums/tokens.dart';
 import 'package:emotion_check_in_app/provider/check_in_provider.dart';
 import 'package:emotion_check_in_app/screens/auth/login_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
+import 'package:emotion_check_in_app/utils/constants/urls.dart';
 import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -48,7 +49,7 @@ class LoginProvider with ChangeNotifier {
       IOClient ioClient = IOClient(httpClient);
 
       final response = await ioClient.post(
-        Uri.parse(EHelperFunctions.isIOS() ? ETexts.LOGIN_ENDPOINT_IOS : ETexts.LOGIN_ENDPOINT_ANDROID),
+        Uri.parse(EHelperFunctions.isIOS() ? EUrls.LOGIN_ENDPOINT_IOS : EUrls.LOGIN_ENDPOINT_ANDROID),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       ).timeout(const Duration(seconds: 60));
@@ -132,7 +133,7 @@ class LoginProvider with ChangeNotifier {
       IOClient ioClient = IOClient(httpClient);
 
       final response = await ioClient.post(
-        Uri.parse(EHelperFunctions.isIOS() ? ETexts.REFRESH_ENDPOINT_IOS : ETexts.REFRESH_ENDPOINT_ANDROID),
+        Uri.parse(EHelperFunctions.isIOS() ? EUrls.REFRESH_ENDPOINT_IOS : EUrls.REFRESH_ENDPOINT_ANDROID),
         headers: {
           'Content-Type': 'application/json',
           'Refresh': storedRefreshToken,

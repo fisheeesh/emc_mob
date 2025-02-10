@@ -234,8 +234,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
       children: [
         GestureDetector(
           onTap: () {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (context) => HomeScreen()));
+            Navigator.pop(context);
           },
           child: const Icon(Icons.arrow_back_ios),
         ),
