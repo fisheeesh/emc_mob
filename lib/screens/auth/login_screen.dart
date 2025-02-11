@@ -117,7 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           validator: EValidator.validatePassword,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                              _isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                             ),
                             onPressed: () {
                               setState(() {

@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/io_client.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:path/path.dart';
 import '../models/check_in.dart';
 import 'package:http/http.dart' as http;
 
@@ -75,7 +74,8 @@ class CheckInProvider with ChangeNotifier {
 
     // If token is expiring in ≤30 minutes, refresh it
     if (timeUntilExpiry.inMinutes <= 30) {
-      debugPrint("Auth token is expiring in ${timeUntilExpiry.inMinutes} minutes. Refreshing...");
+      debugPrint(
+          "Auth token is expiring in ${timeUntilExpiry.inMinutes} minutes. Refreshing...");
       LoginProvider loginProvider = LoginProvider();
       bool refreshed = await loginProvider.refreshToken();
       if (refreshed) {
@@ -97,7 +97,8 @@ class CheckInProvider with ChangeNotifier {
 
     // Create HttpClient with certificate bypass
     HttpClient httpClient = HttpClient()
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
     IOClient ioClient = IOClient(httpClient);
 
     // Prepare request
@@ -111,9 +112,13 @@ class CheckInProvider with ChangeNotifier {
 
     try {
       if (method == "POST") {
-        response = await ioClient.post(uri, headers: headers, body: jsonEncode(body)).timeout(const Duration(seconds: 30));
+        response = await ioClient
+            .post(uri, headers: headers, body: jsonEncode(body))
+            .timeout(const Duration(seconds: 30));
       } else if (method == "GET") {
-        response = await ioClient.get(uri, headers: headers).timeout(const Duration(seconds: 30));
+        response = await ioClient
+            .get(uri, headers: headers)
+            .timeout(const Duration(seconds: 30));
       } else {
         debugPrint("Unsupported HTTP method: $method");
         return null;
@@ -130,12 +135,17 @@ class CheckInProvider with ChangeNotifier {
   /// - Retrieves check-ins from the server.
   /// - Saves them to SQLite for offline access.
   Future<void> fetchCheckIns() async {
-    final endpoint = EHelperFunctions.isIOS() ? EUrls.HISTORY_ENDPOINT_IOS : EUrls.HISTORY_ENDPOINT_ANDROID;
-    final response = await _makeAuthorizedRequest(method: "GET", endpoint: endpoint);
+    final endpoint = EHelperFunctions.isIOS()
+        ? EUrls.HISTORY_ENDPOINT_IOS
+        : EUrls.HISTORY_ENDPOINT_ANDROID;
+    final response =
+        await _makeAuthorizedRequest(method: "GET", endpoint: endpoint);
 
     if (response != null && response.statusCode == 200) {
       List<String> timestamps = List<String>.from(jsonDecode(response.body));
-      _checkIns = timestamps.map((timestamp) => CheckIn.fromJson({'timestamp': timestamp})).toList();
+      _checkIns = timestamps
+          .map((timestamp) => CheckIn.fromJson({'timestamp': timestamp}))
+          .toList();
 
       // Save Check-Ins to SQLite
       await _dbHelper.clearCheckIns();
@@ -165,11 +175,15 @@ class CheckInProvider with ChangeNotifier {
   /// - `context`: The current `BuildContext`.
   /// - `emoji`: The emoji representing the mood.
   /// - `feelingText`: The text description of the mood.
-  Future<bool> sendCheckIn(BuildContext context, String emoji, String feelingText) async {
+  Future<bool> sendCheckIn(
+      BuildContext context, String emoji, String feelingText) async {
     String moodMessage = "$emoji $feelingText";
-    final endpoint = EHelperFunctions.isIOS() ? EUrls.CHECK_IN_ENDPOINT_IOS : EUrls.CHECK_IN_ENDPOINT_ANDROID;
+    final endpoint = EHelperFunctions.isIOS()
+        ? EUrls.CHECK_IN_ENDPOINT_IOS
+        : EUrls.CHECK_IN_ENDPOINT_ANDROID;
 
-    final response = await _makeAuthorizedRequest(method: "POST", endpoint: endpoint, body: {"moodMessage": moodMessage});
+    final response = await _makeAuthorizedRequest(
+        method: "POST", endpoint: endpoint, body: {"moodMessage": moodMessage});
 
     if (response != null && response.statusCode == 200) {
       final checkIn = CheckIn(timestamp: DateTime.now());
@@ -201,11 +215,11 @@ class CheckInProvider with ChangeNotifier {
   CheckIn? getCheckInByDate(DateTime date) {
     return _checkIns.cast<CheckIn?>().firstWhere(
           (checkIn) =>
-      checkIn!.timestamp.day == date.day &&
-          checkIn.timestamp.month == date.month &&
-          checkIn.timestamp.year == date.year,
-      orElse: () => null,
-    );
+              checkIn!.timestamp.day == date.day &&
+              checkIn.timestamp.month == date.month &&
+              checkIn.timestamp.year == date.year,
+          orElse: () => null,
+        );
   }
 
   /// **Retrieves today's check-in.**
@@ -215,10 +229,10 @@ class CheckInProvider with ChangeNotifier {
     final today = DateTime.now();
     return _checkIns.cast<CheckIn?>().firstWhere(
           (checkIn) =>
-      checkIn!.timestamp.day == today.day &&
-          checkIn.timestamp.month == today.month &&
-          checkIn.timestamp.year == today.year,
-      orElse: () => null,
-    );
+              checkIn!.timestamp.day == today.day &&
+              checkIn.timestamp.month == today.month &&
+              checkIn.timestamp.year == today.year,
+          orElse: () => null,
+        );
   }
 }

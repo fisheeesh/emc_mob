@@ -1,5 +1,4 @@
 class ETexts {
-
   // constants
   static const String AUTHORIZATION = "authorization";
   static const String REFRESH = "refresh";

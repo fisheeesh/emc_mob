@@ -1,9 +1,7 @@
 import 'package:emotion_check_in_app/components/buttons/custom_elevated_button.dart';
-import 'package:emotion_check_in_app/screens/main/home_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/colors.dart';
 import 'package:emotion_check_in_app/utils/constants/sizes.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
-import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:emotion_check_in_app/utils/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,7 +27,8 @@ class CheckInSuccessScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
       body: Padding(
-        padding: const EdgeInsets.only(left: ESizes.md, right: ESizes.md, top: ESizes.xl),
+        padding: const EdgeInsets.only(
+            left: ESizes.md, right: ESizes.md, top: ESizes.xl),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

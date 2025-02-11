@@ -1,8 +1,6 @@
 import 'package:emotion_check_in_app/components/buttons/custom_elevated_button.dart';
-import 'package:emotion_check_in_app/demo/emotion_check_in_provider.dart';
 import 'package:emotion_check_in_app/provider/check_in_provider.dart';
 import 'package:emotion_check_in_app/screens/main/check_in_success_screen.dart';
-import 'package:emotion_check_in_app/screens/main/home_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/colors.dart';
 import 'package:emotion_check_in_app/utils/constants/sizes.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
@@ -179,7 +177,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
 
               setState(() => isLoading = false);
 
-              if(isSuccess){
+              if (isSuccess) {
                 EHelperFunctions.navigateToScreen(
                   context,
                   CheckInSuccessScreen(

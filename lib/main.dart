@@ -60,7 +60,11 @@ class MyApp extends StatelessWidget {
       title: 'ATA - Emotion Check-in Application',
       theme: EAppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: isViewed != 0 ? OnBoardingScreen() : isUserLoggedIn ? const HomeScreen() : const LoginScreen(),
+      home: isViewed != 0
+          ? OnBoardingScreen()
+          : isUserLoggedIn
+              ? const HomeScreen()
+              : const LoginScreen(),
     );
   }
 }

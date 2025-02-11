@@ -90,7 +90,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(left: ESizes.md, right: ESizes.md, bottom: ESizes.sm),
+              padding: const EdgeInsets.only(
+                  left: ESizes.md, right: ESizes.md, bottom: ESizes.sm),
               child: onLastPage
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.start,

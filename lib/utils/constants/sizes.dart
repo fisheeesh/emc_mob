@@ -33,5 +33,4 @@ class ESizes {
   static const double roundedSm = 12.0;
   static const double roundedMd = 30.0;
   static const double roundedLg = 50.0;
-
 }

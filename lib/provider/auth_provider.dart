@@ -75,7 +75,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Sends access token to the backend server for authorization
-  Future<bool> _sendAccessTokenToServer(String accessToken, BuildContext context) async {
+  Future<bool> _sendAccessTokenToServer(
+      String accessToken, BuildContext context) async {
     try {
       final headers = {
         'Content-Type': 'application/json',
@@ -87,14 +88,15 @@ class AuthProvider extends ChangeNotifier {
 
       /// Allow self-signed certificates during development (ONLY FOR DEVELOPMENT)
       HttpClient httpClient = HttpClient()
-        ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        ..badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
       IOClient ioClient = IOClient(httpClient);
 
       final response = await ioClient
           .post(
-        Uri.parse(EUrls.AUTHORIZATION_ENDPOINT_ANDROID),
-        headers: headers,
-      )
+            Uri.parse(EUrls.AUTHORIZATION_ENDPOINT_ANDROID),
+            headers: headers,
+          )
           .timeout(const Duration(seconds: 30));
 
       debugPrint('Response: ${response.body}');
@@ -201,7 +203,8 @@ class AuthProvider extends ChangeNotifier {
   bool isTokenValid(String? token) {
     if (token == null || token.isEmpty) return false;
     try {
-      final cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
+      final cleanToken =
+          token.startsWith('Bearer ') ? token.substring(7) : token;
       return !JwtDecoder.isExpired(cleanToken);
     } catch (e) {
       debugPrint("Invalid token: $e");

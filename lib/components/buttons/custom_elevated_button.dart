@@ -1,7 +1,6 @@
 import 'package:emotion_check_in_app/utils/constants/colors.dart';
 import 'package:emotion_check_in_app/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class CustomElevatedButton extends StatelessWidget {
   const CustomElevatedButton({
@@ -11,7 +10,7 @@ class CustomElevatedButton extends StatelessWidget {
   });
 
   final void Function()? onPressed;
-  final Widget placeholder; // ✅ Accepts a Widget instead of String
+  final Widget placeholder;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +40,7 @@ class CustomElevatedButton extends StatelessWidget {
             ),
             minimumSize: const Size.fromHeight(100),
           ),
-          child: placeholder, // ✅ Now accepts any Widget
+          child: placeholder,
         ),
       ),
     );

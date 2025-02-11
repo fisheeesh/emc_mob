@@ -7,7 +7,10 @@ import 'package:intl/intl.dart';
 class EHelperFunctions {
   static void showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating,),
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 
@@ -32,13 +35,6 @@ class EHelperFunctions {
   static void navigateToScreen(BuildContext context, Widget screen) {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (builder) => screen));
-  }
-
-  static String truncateText(String text, int maxLength) {
-    if (text.length > maxLength) {
-      return '${text.substring(0, maxLength)}...';
-    }
-    return text;
   }
 
   static String getFormattedDate(DateTime date, String format) {

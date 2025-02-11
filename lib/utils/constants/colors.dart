@@ -21,5 +21,4 @@ class EColors {
   // dot indicator
   static const Color activeDotColor = Color(0xFF3085FE);
   static const Color dotColor = Color(0xFFBAD6FE);
-
 }

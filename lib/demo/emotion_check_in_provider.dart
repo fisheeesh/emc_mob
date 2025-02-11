@@ -54,15 +54,16 @@ class EmotionCheckInProvider with ChangeNotifier {
     final today = DateTime.now();
     return _checkInList.cast<EmotionCheckIn?>().firstWhere(
           (checkIn) =>
-      checkIn!.checkInTime.day == today.day &&
-          checkIn.checkInTime.month == today.month &&
-          checkIn.checkInTime.year == today.year,
-      orElse: () => null,
-    );
+              checkIn!.checkInTime.day == today.day &&
+              checkIn.checkInTime.month == today.month &&
+              checkIn.checkInTime.year == today.year,
+          orElse: () => null,
+        );
   }
 
   /// Add a new check-in data
-  void addCheckIn(String userName, DateTime checkInTime, String emoji, String label, String feeling) {
+  void addCheckIn(String userName, DateTime checkInTime, String emoji,
+      String label, String feeling) {
     final checkInType = _determineCheckInType(checkInTime);
     final newCheckIn = EmotionCheckIn(
       userName: userName,
@@ -81,17 +82,20 @@ class EmotionCheckInProvider with ChangeNotifier {
   EmotionCheckIn? getCheckInByDate(DateTime date) {
     return _checkInList.cast<EmotionCheckIn?>().firstWhere(
           (checkIn) =>
-      checkIn!.checkInTime.day == date.day &&
-          checkIn.checkInTime.month == date.month &&
-          checkIn.checkInTime.year == date.year,
-      orElse: () => null,
-    );
+              checkIn!.checkInTime.day == date.day &&
+              checkIn.checkInTime.month == date.month &&
+              checkIn.checkInTime.year == date.year,
+          orElse: () => null,
+        );
   }
 
   /// Determine if the check-in is on time or late
   CheckInType _determineCheckInType(DateTime checkInTime) {
-    final today = DateTime(checkInTime.year, checkInTime.month, checkInTime.day);
+    final today =
+        DateTime(checkInTime.year, checkInTime.month, checkInTime.day);
     final onTimeEnd = DateTime(today.year, today.month, today.day, 9, 30);
-    return checkInTime.isBefore(onTimeEnd) ? CheckInType.onTime : CheckInType.late;
+    return checkInTime.isBefore(onTimeEnd)
+        ? CheckInType.onTime
+        : CheckInType.late;
   }
 }

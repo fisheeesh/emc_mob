@@ -22,7 +22,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     Provider.of<CheckInProvider>(context, listen: false).loadCheckInsFromDB();
   }
@@ -50,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final checkInProvider = context.watch<CheckInProvider>();
     final loginProvider = context.watch<LoginProvider>();
     final userName = loginProvider.userName ?? "Guest";
-    final userEmail = loginProvider.userEmail ?? '@ata-it-th.com';
 
     return Scaffold(
       body: Padding(
@@ -89,7 +87,11 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: checkInProvider.todayCheckIn != null
             ? null
             : () {
-               Navigator.push(context, MaterialPageRoute(builder: (context) => EmotionCheckInScreen(userName: userName)));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            EmotionCheckInScreen(userName: userName)));
               },
         placeholder: Text(
           ETexts.CHECK_IN,

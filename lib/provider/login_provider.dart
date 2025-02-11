@@ -44,17 +44,23 @@ class LoginProvider with ChangeNotifier {
   /// **Returns:**
   /// - `true` if login is successful.
   /// - `false` if login fails (due to incorrect credentials, network issues, or server errors).
-  Future<bool> loginWithEmailAndPassword(BuildContext context, String email, String password) async {
+  Future<bool> loginWithEmailAndPassword(
+      BuildContext context, String email, String password) async {
     try {
       HttpClient httpClient = HttpClient()
-        ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        ..badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
       IOClient ioClient = IOClient(httpClient);
 
-      final response = await ioClient.post(
-        Uri.parse(EHelperFunctions.isIOS() ? EUrls.LOGIN_ENDPOINT_IOS : EUrls.LOGIN_ENDPOINT_ANDROID),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
-      ).timeout(const Duration(seconds: 30));
+      final response = await ioClient
+          .post(
+            Uri.parse(EHelperFunctions.isIOS()
+                ? EUrls.LOGIN_ENDPOINT_IOS
+                : EUrls.LOGIN_ENDPOINT_ANDROID),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email, 'password': password}),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         String? authToken = response.headers[ETexts.AUTHORIZATION];
@@ -65,29 +71,30 @@ class LoginProvider with ChangeNotifier {
           _decodeUserInfoFromToken(authToken);
           _authToken = authToken;
           notifyListeners();
+
           /// Send request to server only when user do login and successfully login to avoid unnecessary api calss
           await context.read<CheckInProvider>().fetchCheckIns();
           return true;
         }
       } else {
         debugPrint('Login failed: ${response.body}');
-        if(context.mounted){
+        if (context.mounted) {
           EHelperFunctions.showSnackBar(context, response.body);
         }
       }
     } on TimeoutException {
       debugPrint(EDebug.REQ_TIME_OUT);
-      if(context.mounted){
+      if (context.mounted) {
         EHelperFunctions.showSnackBar(context, EStatus.REQ_TIME_OUT);
       }
     } on SocketException {
       debugPrint(EDebug.NO_INTERNET);
-      if(context.mounted){
+      if (context.mounted) {
         EHelperFunctions.showSnackBar(context, EStatus.NO_INTERNET);
       }
     } catch (e) {
       debugPrint('Login error: $e');
-      if(context.mounted){
+      if (context.mounted) {
         EHelperFunctions.showSnackBar(context, e.toString());
       }
     }
@@ -123,7 +130,8 @@ class LoginProvider with ChangeNotifier {
   /// - `true` if the token refresh is successful.
   /// - `false` if the refresh token is invalid or expired.
   Future<bool> refreshToken() async {
-    String? storedRefreshToken = await _secureStorage.read(key: ETokens.refreshToken.name);
+    String? storedRefreshToken =
+        await _secureStorage.read(key: ETokens.refreshToken.name);
     if (storedRefreshToken == null) {
       debugPrint(EDebug.NO_REFRESH_TOKEN);
       return false;
@@ -131,11 +139,14 @@ class LoginProvider with ChangeNotifier {
 
     try {
       HttpClient httpClient = HttpClient()
-        ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        ..badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
       IOClient ioClient = IOClient(httpClient);
 
       final response = await ioClient.post(
-        Uri.parse(EHelperFunctions.isIOS() ? EUrls.REFRESH_ENDPOINT_IOS : EUrls.REFRESH_ENDPOINT_ANDROID),
+        Uri.parse(EHelperFunctions.isIOS()
+            ? EUrls.REFRESH_ENDPOINT_IOS
+            : EUrls.REFRESH_ENDPOINT_ANDROID),
         headers: {
           'Content-Type': 'application/json',
           'Refresh': storedRefreshToken,
@@ -173,7 +184,6 @@ class LoginProvider with ChangeNotifier {
     notifyListeners();
   }
 
-
   /// **Ensures the authentication token is valid.**
   ///
   /// If the refresh token is still valid, it refreshes the authentication token.
@@ -187,12 +197,14 @@ class LoginProvider with ChangeNotifier {
   /// - `true` if the token refresh is successful.
   /// - `false` if the refresh token has expired.
   Future<bool> ensureValidToken() async {
-    String? storedRefreshToken = await _secureStorage.read(key: ETokens.refreshToken.name);
+    String? storedRefreshToken =
+        await _secureStorage.read(key: ETokens.refreshToken.name);
     if (storedRefreshToken == null) return false;
 
     try {
       // Check refresh token expiration
-      DateTime expirationTime = JwtDecoder.getExpirationDate(storedRefreshToken);
+      DateTime expirationTime =
+          JwtDecoder.getExpirationDate(storedRefreshToken);
       Duration timeUntilExpiry = expirationTime.difference(DateTime.now());
 
       // If refresh token is expired, return false (force login)
@@ -202,7 +214,8 @@ class LoginProvider with ChangeNotifier {
       }
 
       // If refresh token is still valid, attempt to refresh auth token
-      debugPrint("Refresh token is valid for ${timeUntilExpiry.inMinutes} minutes.");
+      debugPrint(
+          "Refresh token is valid for ${timeUntilExpiry.inMinutes} minutes.");
 
       return await refreshToken();
     } catch (e) {
@@ -225,7 +238,8 @@ class LoginProvider with ChangeNotifier {
   /// - Overwrites any existing stored tokens.
   Future<void> _saveTokens(String authToken, String refreshToken) async {
     await _secureStorage.write(key: ETokens.authToken.name, value: authToken);
-    await _secureStorage.write(key: ETokens.refreshToken.name, value: refreshToken);
+    await _secureStorage.write(
+        key: ETokens.refreshToken.name, value: refreshToken);
   }
 
   /// **Logs out the user and clears stored authentication data.**
@@ -240,7 +254,7 @@ class LoginProvider with ChangeNotifier {
     _userName = null;
     notifyListeners();
     await context.read<CheckInProvider>().clearData();
-    if(context.mounted){
+    if (context.mounted) {
       EHelperFunctions.navigateToScreen(context, LoginScreen());
     }
   }
