@@ -90,14 +90,14 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: ESizes.md),
+              padding: const EdgeInsets.only(left: ESizes.md, right: ESizes.md, bottom: ESizes.sm),
               child: onLastPage
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         _arrowBackButton(),
                         const SizedBox(width: 10),
-                        _toLogInPageButton(context)
+                        Expanded(child: _toLogInPageButton(context))
                       ],
                     )
                   : _nextButton(),
@@ -124,7 +124,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   CustomButton _toLogInPageButton(BuildContext context) {
     return CustomButton(
-      width: EHelperFunctions.isIOS() ? 280 : 298,
+      width: ESizes.wFull,
       height: ESizes.hNormal,
       child: Text(
         ETexts.LOGIN,

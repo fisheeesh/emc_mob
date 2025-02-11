@@ -29,26 +29,28 @@ class CheckInSuccessScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: ESizes.md),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            /// Checkmark Icon
-            _successIcon(),
-            const SizedBox(height: 20),
+        padding: const EdgeInsets.only(left: ESizes.md, right: ESizes.md, top: ESizes.xl),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              /// Checkmark Icon
+              _successIcon(),
+              const SizedBox(height: 20),
 
-            /// Success Message
-            _successMsg(),
-            const SizedBox(height: 40),
+              /// Success Message
+              _successMsg(),
+              const SizedBox(height: 40),
 
-            /// User check-in info
-            _checkInInfoCard(),
-            const SizedBox(height: 40),
+              /// User check-in info
+              _checkInInfoCard(),
+              const SizedBox(height: 40),
 
-            /// Back to Home Button
-            _backToHomButton(context)
-          ],
+              /// Back to Home Button
+              _backToHomButton(context)
+            ],
+          ),
         ),
       ),
     );

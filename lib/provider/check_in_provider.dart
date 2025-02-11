@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/io_client.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:path/path.dart';
 import '../models/check_in.dart';
 import 'package:http/http.dart' as http;
 
