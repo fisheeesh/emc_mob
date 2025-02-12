@@ -49,15 +49,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final checkInProvider = context.watch<CheckInProvider>();
     final loginProvider = context.watch<LoginProvider>();
     final userName = loginProvider.userName ?? "Guest";
+    double topPadding = MediaQuery.of(context).size.height * 0.07;
 
     return Scaffold(
       body: Padding(
-        padding: EHelperFunctions.isIOS()
-            ? const EdgeInsets.only(left: 28, right: 28, top: 75, bottom: 35)
-            : const EdgeInsets.only(
+        padding: EdgeInsets.only(
                 left: ESizes.md,
                 right: ESizes.md,
-                top: ESizes.base,
+                top: topPadding,
                 bottom: ESizes.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

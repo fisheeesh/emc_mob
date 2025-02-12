@@ -24,11 +24,13 @@ class CheckInSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double topPadding = MediaQuery.of(context).size.height * 0.15;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
       body: Padding(
-        padding: const EdgeInsets.only(
-            left: ESizes.md, right: ESizes.md, top: ESizes.xl),
+        padding: EdgeInsets.only(
+            left: ESizes.md, right: ESizes.md, top: topPadding),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +46,7 @@ class CheckInSuccessScreen extends StatelessWidget {
 
               /// User check-in info
               _checkInInfoCard(),
-              const SizedBox(height: 40),
+              const SizedBox(height: 120),
 
               /// Back to Home Button
               _backToHomButton(context)
@@ -91,7 +93,7 @@ class CheckInSuccessScreen extends StatelessWidget {
                 emoji,
                 style: TextStyle(fontSize: 40),
               ),
-              const SizedBox(height: 8),
+
               Text(
                 label,
                 style: ETextTheme.lightTextTheme.labelLarge,

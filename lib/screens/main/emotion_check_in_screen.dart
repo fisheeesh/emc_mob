@@ -70,95 +70,142 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
       {'icon': '😇', 'label': 'peaceful'},
     ],
   };
+  static const int _maxCharacters = 100;
+  int _remainingCharacters = _maxCharacters;
+
+  @override
+  void initState() {
+    super.initState();
+    _feelingController.addListener(_updateCharacterCount);
+  }
+
+  @override
+  void dispose() {
+    _feelingController.removeListener(_updateCharacterCount);
+    _feelingController.dispose();
+    super.dispose();
+  }
+
+  void _updateCharacterCount() {
+    setState(() {
+      _remainingCharacters = _maxCharacters - _feelingController.text.length;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // resizeToAvoidBottomInset: false,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EHelperFunctions.isIOS()
-              ? const EdgeInsets.only(left: 28, right: 28, top: 75)
-              : const EdgeInsets.only(
-                  left: ESizes.md, right: ESizes.md, top: ESizes.base),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              /// header section
-              _headerSection(context),
-              const SizedBox(height: 15),
+    double topPadding = MediaQuery.of(context).size.height * 0.07;
 
-              /// Tab Bar and Emoji Grid
-              Container(
-                padding: const EdgeInsets.all(ESizes.md),
-                decoration: BoxDecoration(
-                  color: EColors.white,
-                  borderRadius: BorderRadius.circular(ESizes.roundedSm),
-                  boxShadow: [
-                    BoxShadow(
-                      color: EColors.grey.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Tab Bar
-                    _tabBarSection(),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    // Emoji Grid
-                    _emojiGridSection(),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 15),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        // resizeToAvoidBottomInset: false,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+                    left: ESizes.md, right: ESizes.md, top: topPadding),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                /// header section
+                _headerSection(context),
+                const SizedBox(height: 15),
 
-              /// Feeling Text Field
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(ESizes.roundedSm),
-                  boxShadow: [
-                    BoxShadow(
-                      color: EColors.grey.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _feelingController,
-                  cursorColor: EColors.grey,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: ETexts.HINT,
-                    hintStyle: TextStyle(color: EColors.grey),
-                    // Border when the field is focused
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(ESizes.roundedXs),
-                      borderSide:
-                          BorderSide(color: EColors.lightBlue, width: 2),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(ESizes.roundedXs),
-                      borderSide:
-                          BorderSide(color: EColors.lightBlue, width: 2),
-                    ),
+                /// Tab Bar and Emoji Grid
+                Container(
+                  padding: const EdgeInsets.all(ESizes.md),
+                  decoration: BoxDecoration(
+                    color: EColors.white,
+                    borderRadius: BorderRadius.circular(ESizes.roundedSm),
+                    boxShadow: [
+                      BoxShadow(
+                        color: EColors.grey.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Tab Bar
+                      _tabBarSection(),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      // Emoji Grid
+                      _emojiGridSection(),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 15),
+                const SizedBox(height: 15),
 
-              /// submit button
-              _submitButton(),
-              const SizedBox(height: 15),
-            ],
+                /// Feeling Text Field
+                _feelingTextField(),
+
+                const SizedBox(height: 20,),
+                /// submit button
+                _submitButton(),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+  /// Feeling Text Field with Character Counter
+  Widget _feelingTextField() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(ESizes.roundedSm),
+        boxShadow: [
+          BoxShadow(
+            color: EColors.grey.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _feelingController,
+            cursorColor: EColors.grey,
+            maxLines: 3,
+            maxLength: _maxCharacters, // Enforces character limit
+            decoration: InputDecoration(
+              hintText: ETexts.HINT,
+              counterText: '', // Hide default counter
+              hintStyle: GoogleFonts.lexend(
+                textStyle: TextStyle(color: EColors.grey, fontSize: 16),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(ESizes.roundedXs),
+                borderSide: BorderSide(color: EColors.lightBlue, width: 2),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(ESizes.roundedXs),
+                borderSide: BorderSide(color: EColors.lightBlue, width: 2),
+              ),
+            ),
+            onChanged: (text) => _updateCharacterCount(),
+          ),
+          const SizedBox(height: 5),
+
+          /// Real-time character counter
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              "$_remainingCharacters characters left",
+              style: TextStyle(
+                color: _remainingCharacters < 10 ? EColors.danger : EColors.grey,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -300,9 +347,9 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.05,
+        crossAxisSpacing: 1,
+        mainAxisSpacing: 1,
+        childAspectRatio: 1.1,
       ),
       itemCount: emotions.length,
       itemBuilder: (context, index) {
@@ -321,7 +368,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
               color: isSelected ? Colors.blue.shade100 : EColors.white,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: isSelected ? EColors.primary : Colors.grey.shade300,
+                color: isSelected ? EColors.primary : Colors.transparent,
                 width: 2,
               ),
             ),
