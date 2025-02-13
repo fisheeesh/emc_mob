@@ -172,13 +172,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _calendarSection(CheckInProvider checkInProvider) {
-    final checkInList = checkInProvider.checkIns;
-
-    Map<DateTime, Color> checkInTypeMap = {
-      for (var checkIn in checkInList)
-        DateTime(checkIn.timestamp.year, checkIn.timestamp.month,
-            checkIn.timestamp.day): EColors.onTimeColor
-    };
+    /// Convert to Set for quick lookups
+    final checkInDates = checkInProvider.checkIns.map((checkIn) =>
+        DateTime(checkIn.timestamp.year, checkIn.timestamp.month, checkIn.timestamp.day)
+    ).toSet();
 
     return Container(
       decoration: BoxDecoration(
@@ -197,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
           firstDay: DateTime.utc(2000, 1, 1),
           lastDay: DateTime.utc(2100, 12, 31),
           focusedDay: _focusedDay,
-          selectedDayPredicate: (day) => _selectedDay.year != 2000 && isSameDay(day, _selectedDay),
+          selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
           onDaySelected: (selectedDay, focusedDay) {
             setState(() {
               _selectedDay = selectedDay;
@@ -219,23 +216,26 @@ class _HomeScreenState extends State<HomeScreen> {
             outsideDaysVisible: false,
             defaultTextStyle: const TextStyle(color: EColors.dark),
             weekendTextStyle: const TextStyle(color: EColors.dark),
-            todayDecoration: const BoxDecoration(), // No highlight for today
-            selectedDecoration: const BoxDecoration(), // No default highlight
-            rangeHighlightColor: Colors.transparent, // No range highlight
-            markerDecoration: const BoxDecoration(), // No default markers
+            /// No default highlight
+            todayDecoration: const BoxDecoration(),
+            /// No highlight by default
+            selectedDecoration: const BoxDecoration(),
+            /// No range highlight
+            rangeHighlightColor: Colors.transparent,
+            /// No default markers
+            markerDecoration: const BoxDecoration(),
             cellMargin: const EdgeInsets.all(4),
           ),
           availableGestures: AvailableGestures.horizontalSwipe,
           calendarBuilders: CalendarBuilders(
             defaultBuilder: (context, day, focusedDay) {
-              return _buildDayCell(day, checkInTypeMap);
+              return _buildDayCell(day, checkInDates);
             },
             selectedBuilder: (context, day, focusedDay) {
               return _buildHighlightedDay(day, EColors.lightBlue);
             },
             todayBuilder: (context, day, focusedDay) {
-              final hasCheckIn =
-              checkInTypeMap.containsKey(DateTime(day.year, day.month, day.day));
+              final hasCheckIn = checkInDates.contains(DateTime(day.year, day.month, day.day));
               return _buildTodayHighlight(day, hasCheckIn);
             },
           ),
@@ -244,11 +244,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildDayCell(DateTime day, Map<DateTime, Color> checkInTypeMap) {
-    final checkInColor = checkInTypeMap[DateTime(day.year, day.month, day.day)];
-
-    if (checkInColor != null) {
-      return _buildHighlightedDay(day, checkInColor);
+  /// Handles highlighting for regular days (check-in days only)
+  Widget _buildDayCell(DateTime day, Set<DateTime> checkInDates) {
+    if (checkInDates.contains(DateTime(day.year, day.month, day.day))) {
+      return _buildHighlightedDay(day, EColors.onTimeColor);
     }
 
     return Center(
@@ -259,6 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Generic method to highlight selected or check-in days
   Widget _buildHighlightedDay(DateTime day, Color color) {
     return Center(
       child: Container(
@@ -281,6 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Custom highlight for today's date (stroke if no check-in, filled if check-in exists)
   Widget _buildTodayHighlight(DateTime day, bool hasCheckIn) {
     return Center(
       child: Container(
@@ -291,7 +292,8 @@ class _HomeScreenState extends State<HomeScreen> {
           shape: BoxShape.circle,
           border: Border.all(
             color: EColors.onTimeColor,
-            width: hasCheckIn ? 0 : 2, // Stroke only if no check-in data
+            /// Stroke only if no check-in data
+            width: hasCheckIn ? 0 : 2,
           ),
         ),
         child: Center(
