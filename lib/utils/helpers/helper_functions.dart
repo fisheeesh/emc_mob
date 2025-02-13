@@ -37,6 +37,12 @@ class EHelperFunctions {
         context, MaterialPageRoute(builder: (builder) => screen));
   }
 
+  static String ensureEndsWithFullStop(String text) {
+    text = text.trim();
+    if (text.isEmpty) return text;
+    return text.endsWith('.') ? text : "$text.";
+  }
+
   static String getFormattedDate(DateTime date, String format) {
     return DateFormat(format).format(date);
   }

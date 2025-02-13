@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final checkInProvider = context.watch<CheckInProvider>();
     final loginProvider = context.watch<LoginProvider>();
     final userName = loginProvider.userName ?? "Guest";
-    double topPadding = MediaQuery.of(context).size.height * 0.07;
+    double topPadding = MediaQuery.of(context).size.height * (EHelperFunctions.isIOS() ? 0.07 : 0.05);
 
     return Scaffold(
       body: Padding(

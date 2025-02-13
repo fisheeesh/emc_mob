@@ -92,19 +92,17 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    double topPadding = MediaQuery.of(context).size.height * 0.07;
+    double topPadding = MediaQuery.of(context).size.height * (EHelperFunctions.isIOS() ? 0.07 : 0.05);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        // resizeToAvoidBottomInset: false,
         body: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(
-                    left: ESizes.md, right: ESizes.md, top: topPadding, bottom: ESizes.md),
+                    left: ESizes.md, right: ESizes.md, top: topPadding),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -138,12 +136,12 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: EHelperFunctions.isIOS() ? 20 : 15),
 
                 /// Feeling Text Field
                 _feelingTextField(),
 
-                SizedBox(height: 10,),
+                SizedBox(height: EHelperFunctions.isIOS() ? 20 : 15),
                 /// submit button
                 _submitButton(),
               ],
@@ -176,7 +174,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
             controller: _feelingController,
             cursorColor: EColors.grey,
             maxLines: 3,
-            maxLength: _maxCharacters, // Enforces character limit
+            maxLength: _maxCharacters,
             decoration: InputDecoration(
               hintText: ETexts.HINT,
               counterText: '', // Hide default counter
@@ -195,7 +193,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
           ),
           const SizedBox(height: 5),
 
-          /// **Real-time Character Counter**
+          /// Real-time Character Counter
           Align(
             alignment: Alignment.centerRight,
             child: Text(
