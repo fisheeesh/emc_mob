@@ -71,7 +71,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
     ],
   };
   static const int _maxCharacters = 100;
-  int _remainingCharacters = _maxCharacters;
+  int _currentCharacterCount = 0; // Starts from 0
 
   @override
   void initState() {
@@ -88,13 +88,14 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
 
   void _updateCharacterCount() {
     setState(() {
-      _remainingCharacters = _maxCharacters - _feelingController.text.length;
+      _currentCharacterCount = _feelingController.text.length;
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
-    double topPadding = MediaQuery.of(context).size.height * 0.06;
+    double topPadding = MediaQuery.of(context).size.height * 0.07;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -130,19 +131,19 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                       // Tab Bar
                       _tabBarSection(),
                       SizedBox(
-                        height: 15,
+                        height: 10,
                       ),
                       // Emoji Grid
                       _emojiGridSection(),
                     ],
                   ),
                 ),
-                SizedBox(height: EHelperFunctions.isIOS() ? 15 : 10,),
+                SizedBox(height: 10),
 
                 /// Feeling Text Field
                 _feelingTextField(),
 
-                SizedBox(height: EHelperFunctions.isIOS() ? 25 : 10,),
+                SizedBox(height: 10,),
                 /// submit button
                 _submitButton(),
               ],
@@ -152,6 +153,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
       ),
     );
   }
+
   /// Feeling Text Field with Character Counter
   Widget _feelingTextField() {
     return Container(
@@ -190,17 +192,16 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                 borderSide: BorderSide(color: EColors.lightBlue, width: 2),
               ),
             ),
-            onChanged: (text) => _updateCharacterCount(),
           ),
           const SizedBox(height: 5),
 
-          /// Real-time character counter
+          /// **Real-time Character Counter**
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              "$_remainingCharacters characters left",
+              "$_currentCharacterCount/$_maxCharacters",
               style: TextStyle(
-                color: _remainingCharacters < 10 ? EColors.danger : EColors.grey,
+                color: _currentCharacterCount >= 90 ? EColors.danger : EColors.grey,
                 fontSize: 14,
               ),
             ),

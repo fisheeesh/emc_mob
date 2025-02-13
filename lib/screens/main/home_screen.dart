@@ -26,7 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
     Provider.of<CheckInProvider>(context, listen: false).loadCheckInsFromDB();
   }
 
-  DateTime _selectedDay = DateTime(2000, 1, 1);
+  // DateTime _selectedDay = DateTime(2000, 1, 1);
+  DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
 
   /// Greet to users according to time zone
@@ -49,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final checkInProvider = context.watch<CheckInProvider>();
     final loginProvider = context.watch<LoginProvider>();
     final userName = loginProvider.userName ?? "Guest";
-    double topPadding = MediaQuery.of(context).size.height * 0.06;
+    double topPadding = MediaQuery.of(context).size.height * 0.07;
 
     return Scaffold(
       body: Padding(

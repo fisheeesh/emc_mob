@@ -2,7 +2,6 @@ import 'package:emotion_check_in_app/components/buttons/custom_elevated_button.d
 import 'package:emotion_check_in_app/utils/constants/colors.dart';
 import 'package:emotion_check_in_app/utils/constants/sizes.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
-import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:emotion_check_in_app/utils/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,28 +30,26 @@ class CheckInSuccessScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FB),
       body: Padding(
         padding: EdgeInsets.only(
-            left: ESizes.md, right: ESizes.md, top: topPadding),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              /// Checkmark Icon
-              _successIcon(),
-              const SizedBox(height: 20),
+            left: ESizes.md, right: ESizes.md, top: topPadding, bottom: ESizes.md),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            /// Checkmark Icon
+            _successIcon(),
+            const SizedBox(height: 20),
 
-              /// Success Message
-              _successMsg(),
-              const SizedBox(height: 40),
+            /// Success Message
+            _successMsg(),
+            const SizedBox(height: 40),
 
-              /// User check-in info
-              _checkInInfoCard(),
-              SizedBox(height:EHelperFunctions.isIOS() ? 95 : 120),
+            /// User check-in info
+            _checkInInfoCard(),
+            const Spacer(),
 
-              /// Back to Home Button
-              _backToHomButton(context)
-            ],
-          ),
+            /// Back to Home Button
+            _backToHomButton(context)
+          ],
         ),
       ),
     );
