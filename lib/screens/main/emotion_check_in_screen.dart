@@ -24,7 +24,7 @@ class EmotionCheckInScreen extends StatefulWidget {
 
 class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
   /// Tracks the selected tab (0: Negative, 1: Neutral, 2: Positive)
-  int _selectedTabIndex = 0;
+  int _selectedTabIndex = 1;
 
   /// Tracks the selected emotion (only one can be selected)
   String? _selectedEmotion;
@@ -177,7 +177,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
             maxLength: _maxCharacters,
             decoration: InputDecoration(
               hintText: ETexts.HINT,
-              counterText: '', // Hide default counter
+              counterText: '',
               hintStyle: GoogleFonts.lexend(
                 textStyle: TextStyle(color: EColors.grey, fontSize: 16),
               ),
@@ -217,7 +217,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
 
               var isSuccess = await context.read<CheckInProvider>().sendCheckIn(
                     context,
-                    _selectedEmotion!,
+                    _selectedLabel!,
                     _feelingController.text,
                   );
 

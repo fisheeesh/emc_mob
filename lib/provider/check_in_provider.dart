@@ -176,8 +176,8 @@ class CheckInProvider with ChangeNotifier {
   /// - `emoji`: The emoji representing the mood.
   /// - `feelingText`: The text description of the mood.
   Future<bool> sendCheckIn(
-      BuildContext context, String emoji, String feelingText) async {
-    String moodMessage = "$emoji. ${EHelperFunctions.ensureEndsWithFullStop(feelingText)}";
+      BuildContext context, String label, String feelingText) async {
+    String moodMessage = "(:I am $label). ${EHelperFunctions.ensureEndsWithFullStop(feelingText)}";
     final endpoint = EHelperFunctions.isIOS()
         ? EUrls.CHECK_IN_ENDPOINT_IOS
         : EUrls.CHECK_IN_ENDPOINT_ANDROID;
