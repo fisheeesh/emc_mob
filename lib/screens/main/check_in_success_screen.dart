@@ -30,7 +30,7 @@ class CheckInSuccessScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FB),
       body: Padding(
         padding: EdgeInsets.only(
-            left: ESizes.md, right: ESizes.md, top: topPadding, bottom: ESizes.md),
+            left: ESizes.md, right: ESizes.md, top: topPadding, bottom: 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

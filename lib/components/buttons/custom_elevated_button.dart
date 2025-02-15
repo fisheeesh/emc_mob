@@ -14,34 +14,17 @@ class CustomElevatedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 150,
-      padding: EdgeInsets.symmetric(horizontal: ESizes.md),
-      decoration: BoxDecoration(
-        color: EColors.secondary,
-        border: Border.all(color: EColors.white),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFB4D2F1),
-            blurRadius: 10,
-            spreadRadius: 2,
-            offset: const Offset(0, 0),
+    return Center(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: EColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ESizes.roundedLg),
           ),
-        ],
-      ),
-      child: Center(
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: EColors.primary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(ESizes.roundedLg),
-            ),
-            minimumSize: const Size.fromHeight(100),
-          ),
-          child: placeholder,
+          minimumSize: const Size.fromHeight(100),
         ),
+        child: placeholder,
       ),
     );
   }

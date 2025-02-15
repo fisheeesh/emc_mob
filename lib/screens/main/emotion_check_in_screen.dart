@@ -132,19 +132,19 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                         child: _tabBarSection(),
                       ),
                       SizedBox(
-                        height: 10,
+                        height: 20,
                       ),
                       // Emoji Grid
                       _emojiGridSection(),
                     ],
                   ),
                 ),
-                SizedBox(height: EHelperFunctions.isIOS() ? 20 : 15),
+                SizedBox(height: EHelperFunctions.isIOS() ? 25 : 15),
 
                 /// Feeling Text Field
                 _feelingTextField(),
 
-                SizedBox(height: EHelperFunctions.isIOS() ? 20 : 15),
+                SizedBox(height: EHelperFunctions.isIOS() ? 25 : 15),
                 /// submit button
                 _submitButton(),
               ],
@@ -176,7 +176,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
           TextField(
             controller: _feelingController,
             cursorColor: EColors.grey,
-            maxLines: 3,
+            maxLines: 4,
             maxLength: _maxCharacters,
             decoration: InputDecoration(
               hintText: ETexts.HINT,

@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 left: ESizes.md,
                 right: ESizes.md,
                 top: topPadding,
-                bottom: ESizes.md),
+                bottom: 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
