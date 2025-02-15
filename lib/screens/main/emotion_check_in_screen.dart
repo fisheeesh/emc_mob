@@ -139,12 +139,12 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: EHelperFunctions.isIOS() ? 25 : 15),
+                SizedBox(height: EHelperFunctions.isIOS() ? 25 : 22),
 
                 /// Feeling Text Field
                 _feelingTextField(),
 
-                SizedBox(height: EHelperFunctions.isIOS() ? 25 : 15),
+                SizedBox(height: EHelperFunctions.isIOS() ? 25 : 22),
                 /// submit button
                 _submitButton(),
               ],
@@ -340,7 +340,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
             style: GoogleFonts.lexend(
               textStyle: TextStyle(
                 color: isSelected ? Color(0xFF3085FE) : Color(0xFF87878B),
-                fontSize: 12,
+                fontSize: 14,
               )
             ),
           ),
@@ -391,7 +391,6 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                   emotion['icon'],
                   style: const TextStyle(fontSize: 28),
                 ),
-
                 Text(
                   emotion['label'],
                   style: const TextStyle(fontSize: 12),
