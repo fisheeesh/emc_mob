@@ -196,12 +196,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   Padding _pageViewSection() {
-    double topPadding = MediaQuery.of(context).size.height * 0.26;
+    double topPadding = MediaQuery.of(context).size.height * 0.30;
 
     return Padding(
       padding: EdgeInsets.only(
-        left: ESizes.lg,
-        right: ESizes.lg,
+        left: 95,
+        right: 95,
         top: topPadding,
       ),
       child: SizedBox(
