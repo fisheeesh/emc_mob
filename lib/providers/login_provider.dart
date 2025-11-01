@@ -1,17 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:emc_mob/enums/tokens.dart';
 import 'package:emc_mob/providers/check_in_provider.dart';
 import 'package:emc_mob/screens/auth/login_screen.dart';
 import 'package:emc_mob/utils/constants/debug.dart';
 import 'package:emc_mob/utils/constants/status.dart';
-import 'package:emc_mob/utils/constants/text_strings.dart';
 import 'package:emc_mob/utils/constants/urls.dart';
 import 'package:emc_mob/utils/helpers/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/io_client.dart';
+import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:provider/provider.dart';
 
@@ -20,14 +18,14 @@ import 'package:provider/provider.dart';
 /// This provider:
 /// - Manages user login/logout operations.
 /// - Stores and retrieves authentication tokens securely.
-/// - Handles token refresh logic.
+/// - Backend handles token refresh automatically via auth middleware.
 /// - Loads user data from secure storage.
 /// - Provides authentication status to the app.
 class LoginProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  String? _authToken;
-  String? get authToken => _authToken;
+  String? _accessToken;
+  String? get accessToken => _accessToken;
 
   String? _userName;
   String? get userName => _userName;
@@ -47,39 +45,62 @@ class LoginProvider with ChangeNotifier {
   Future<bool> loginWithEmailAndPassword(
       BuildContext context, String email, String password) async {
     try {
-      HttpClient httpClient = HttpClient()
-        ..badCertificateCallback =
-            (X509Certificate cert, String host, int port) => true;
-      IOClient ioClient = IOClient(httpClient);
-
-      final response = await ioClient
+      final response = await http
           .post(
-            Uri.parse(EHelperFunctions.isIOS()
-                ? EUrls.LOGIN_ENDPOINT_IOS
-                : EUrls.LOGIN_ENDPOINT_ANDROID),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'email': email, 'password': password}),
-          )
+        Uri.parse(EHelperFunctions.isIOS()
+            ? EUrls.LOGIN_ENDPOINT_IOS
+            : EUrls.LOGIN_ENDPOINT_ANDROID),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-platform': 'mobile',
+        },
+        body: jsonEncode({'email': email, 'password': password}),
+      )
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        String? authToken = response.headers[ETexts.AUTHORIZATION];
-        String? refreshToken = response.headers[ETexts.REFRESH];
+        final responseBody = jsonDecode(response.body);
 
-        if (authToken != null && refreshToken != null) {
-          await _saveTokens(authToken, refreshToken);
-          _decodeUserInfoFromToken(authToken);
-          _authToken = authToken;
+        // Extract tokens from response body (backend returns them in JSON for mobile)
+        String? accessToken = responseBody['accessToken'];
+        String? refreshToken = responseBody['refreshToken'];
+
+        // Also extract user info from response
+        String? fullName = responseBody['fullName'];
+        String? userEmail = responseBody['email'];
+
+        if (accessToken != null && refreshToken != null) {
+          await _saveTokens(accessToken, refreshToken);
+
+          // Store user info
+          _userName = fullName;
+          _userEmail = userEmail;
+          _accessToken = accessToken;
+
+          // Save to secure storage
+          await _secureStorage.write(
+              key: ETokens.userName.name, value: _userName);
+          await _secureStorage.write(
+              key: ETokens.userEmail.name, value: _userEmail);
+
           notifyListeners();
 
-          /// Send request to server only when user do login and successfully login to avoid unnecessary api calss
-          await context.read<CheckInProvider>().fetchCheckIns();
+          /// Send request to server only when user do login and successfully login to avoid unnecessary api calls
+          if (context.mounted) {
+            await context.read<CheckInProvider>().fetchCheckInsWithContext(context);
+          }
           return true;
         }
       } else {
         debugPrint('Login failed: ${response.body}');
         if (context.mounted) {
-          EHelperFunctions.showSnackBar(context, response.body);
+          try {
+            final errorBody = jsonDecode(response.body);
+            final errorMessage = errorBody['message'] ?? 'Login failed';
+            EHelperFunctions.showSnackBar(context, errorMessage);
+          } catch (e) {
+            EHelperFunctions.showSnackBar(context, 'Login failed');
+          }
         }
       }
     } on TimeoutException {
@@ -87,91 +108,12 @@ class LoginProvider with ChangeNotifier {
       if (context.mounted) {
         EHelperFunctions.showSnackBar(context, EStatus.REQ_TIME_OUT);
       }
-    } on SocketException {
-      debugPrint(EDebug.NO_INTERNET);
-      if (context.mounted) {
-        EHelperFunctions.showSnackBar(context, EStatus.NO_INTERNET);
-      }
     } catch (e) {
       debugPrint('Login error: $e');
       if (context.mounted) {
         EHelperFunctions.showSnackBar(context, e.toString());
       }
     }
-    return false;
-  }
-
-  /// **Decodes user information from the JWT token and stores it.**
-  ///
-  /// Extracts the username and email from the token payload and saves them securely.
-  ///
-  /// **Parameters:**
-  /// - `token`: The JWT authentication token received from the server.
-  void _decodeUserInfoFromToken(String token) {
-    try {
-      final Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-      _userName = decodedToken['username'];
-      _userEmail = decodedToken['sub'];
-      notifyListeners();
-
-      /// Save username and use email securely
-      _secureStorage.write(key: ETokens.userName.name, value: _userName);
-      _secureStorage.write(key: ETokens.userEmail.name, value: _userEmail);
-    } catch (e) {
-      debugPrint("Error decoding token: $e");
-    }
-  }
-
-  /// **Refreshes the authentication token using the stored refresh token.**
-  ///
-  /// If the refresh token is valid, it requests a new authentication token and updates stored credentials.
-  ///
-  /// **Returns:**
-  /// - `true` if the token refresh is successful.
-  /// - `false` if the refresh token is invalid or expired.
-  Future<bool> refreshToken() async {
-    String? storedRefreshToken =
-        await _secureStorage.read(key: ETokens.refreshToken.name);
-    if (storedRefreshToken == null) {
-      debugPrint(EDebug.NO_REFRESH_TOKEN);
-      return false;
-    }
-
-    try {
-      HttpClient httpClient = HttpClient()
-        ..badCertificateCallback =
-            (X509Certificate cert, String host, int port) => true;
-      IOClient ioClient = IOClient(httpClient);
-
-      final response = await ioClient.post(
-        Uri.parse(EHelperFunctions.isIOS()
-            ? EUrls.REFRESH_ENDPOINT_IOS
-            : EUrls.REFRESH_ENDPOINT_ANDROID),
-        headers: {
-          'Content-Type': 'application/json',
-          'Refresh': storedRefreshToken,
-        },
-      ).timeout(const Duration(seconds: 60));
-
-      if (response.statusCode == 200) {
-        String? newAuthToken = response.headers[ETexts.AUTHORIZATION];
-        String? newRefreshToken = response.headers[ETexts.REFRESH];
-
-        if (newAuthToken != null && newRefreshToken != null) {
-          await _saveTokens(newAuthToken, newRefreshToken);
-          _decodeUserInfoFromToken(newAuthToken);
-          _authToken = newAuthToken;
-          notifyListeners();
-          debugPrint(EDebug.SUC_REFRESH);
-          return true;
-        }
-      } else {
-        debugPrint("Refresh token failed: ${response.body}");
-      }
-    } catch (e) {
-      debugPrint("Refresh token error: $e");
-    }
-
     return false;
   }
 
@@ -186,38 +128,32 @@ class LoginProvider with ChangeNotifier {
 
   /// **Ensures the authentication token is valid.**
   ///
-  /// If the refresh token is still valid, it refreshes the authentication token.
-  /// Continuously refresh the authentication token as long as the user is active.
-  ///
-  /// - If the user remains active, their session is extended by refreshing the token.
-  /// - If the user is inactive for **1 week**, they will be required to log in again.
-  /// - This ensures secure, time-limited access without forcing frequent logins.
+  /// Checks if refresh token exists and is not expired.
+  /// Note: Backend handles actual token refresh automatically via auth middleware.
   ///
   /// **Returns:**
-  /// - `true` if the token refresh is successful.
-  /// - `false` if the refresh token has expired.
+  /// - `true` if refresh token is valid.
+  /// - `false` if refresh token has expired or doesn't exist.
   Future<bool> ensureValidToken() async {
     String? storedRefreshToken =
-        await _secureStorage.read(key: ETokens.refreshToken.name);
+    await _secureStorage.read(key: ETokens.refreshToken.name);
     if (storedRefreshToken == null) return false;
 
     try {
       // Check refresh token expiration
       DateTime expirationTime =
-          JwtDecoder.getExpirationDate(storedRefreshToken);
+      JwtDecoder.getExpirationDate(storedRefreshToken);
       Duration timeUntilExpiry = expirationTime.difference(DateTime.now());
 
-      // If refresh token is expired, return false (force login)
+      // If refresh token is expired, return false
       if (timeUntilExpiry.isNegative) {
         debugPrint(EDebug.REFRESH_EXP);
         return false;
       }
 
-      // If refresh token is still valid, attempt to refresh auth token
       debugPrint(
-          "Refresh token is valid for ${timeUntilExpiry.inMinutes} minutes.");
-
-      return await refreshToken();
+          "Refresh token is valid for ${timeUntilExpiry.inDays} days.");
+      return true;
     } catch (e) {
       debugPrint("Refresh token validation error: $e");
       return false;
@@ -236,10 +172,26 @@ class LoginProvider with ChangeNotifier {
   /// Effects:
   /// - Saves both tokens in secure storage.
   /// - Overwrites any existing stored tokens.
-  Future<void> _saveTokens(String authToken, String refreshToken) async {
-    await _secureStorage.write(key: ETokens.authToken.name, value: authToken);
+  Future<void> _saveTokens(String accessToken, String refreshToken) async {
+    await _secureStorage.write(key: ETokens.accessToken.name, value: accessToken);
     await _secureStorage.write(
         key: ETokens.refreshToken.name, value: refreshToken);
+  }
+
+  /// **Updates tokens from response headers after backend rotation.**
+  ///
+  /// The backend auth middleware automatically rotates tokens and returns
+  /// new ones in response headers (x-access-token, x-refresh-token).
+  Future<void> updateTokensFromHeaders(Map<String, String> headers) async {
+    String? newAccessToken = headers['x-access-token'];
+    String? newRefreshToken = headers['x-refresh-token'];
+
+    if (newAccessToken != null && newRefreshToken != null) {
+      await _saveTokens(newAccessToken, newRefreshToken);
+      _accessToken = newAccessToken;
+      notifyListeners();
+      debugPrint("Tokens updated from backend rotation");
+    }
   }
 
   /// **Logs out the user and clears stored authentication data.**
@@ -247,15 +199,19 @@ class LoginProvider with ChangeNotifier {
   /// After logging out, it navigates the user back to the `LoginScreen`.
   /// Clear all tokens from FlutterSecureStorage and clear user's check-in data from sqlite.
   Future<void> logout(BuildContext context) async {
-    await _secureStorage.delete(key: ETokens.authToken.name);
+    await _secureStorage.delete(key: ETokens.accessToken.name);
     await _secureStorage.delete(key: ETokens.refreshToken.name);
     await _secureStorage.delete(key: ETokens.userName.name);
-    _authToken = null;
+    await _secureStorage.delete(key: ETokens.userEmail.name);
+    _accessToken = null;
     _userName = null;
+    _userEmail = null;
     notifyListeners();
-    await context.read<CheckInProvider>().clearData();
     if (context.mounted) {
-      EHelperFunctions.navigateToScreen(context, LoginScreen());
+      await context.read<CheckInProvider>().clearData();
+    }
+    if (context.mounted) {
+      EHelperFunctions.navigateToScreen(context, const LoginScreen());
     }
   }
 }
