@@ -1,47 +1,72 @@
-/// Represents a check-in entry with a timestamp.
+/// Represents a check-in entry with emotion data and timestamp.
 ///
 /// This model is used to store and retrieve check-in records from
 /// both the API and local SQLite database.
 class CheckIn {
-  /// The timestamp of the check-in.
-  final DateTime timestamp;
+  final String emoji;
+  final String textFeeling;
+  final DateTime createdAt;
+  final String checkInTime;
 
-  CheckIn({required this.timestamp});
+  CheckIn({
+    required this.emoji,
+    required this.textFeeling,
+    required this.createdAt,
+    required this.checkInTime,
+  });
 
   /// **Creates a `CheckIn` object from a JSON map.**
   ///
-  /// - Parses the `timestamp` string into a `DateTime` object.
-  /// - Converts the timestamp to **local time** for consistency.
+  /// - Parses the API response format with emoji, textFeeling, createdAt, checkInTime
+  /// - Converts the createdAt timestamp to **local time** for consistency.
   ///
   /// **Throws:**
   /// - `FormatException` if the timestamp format is invalid.
   ///
   /// **Example Usage:**
   /// ```dart
-  /// final checkIn = CheckIn.fromJson({'timestamp': '2025-02-10T12:00:00Z'});
+  /// final checkIn = CheckIn.fromJson({
+  ///   'emoji': '😏',
+  ///   'textFeeling': 'Feeling pretty smug',
+  ///   'createdAt': '2025-10-28T13:29:02.493Z',
+  ///   'checkInTime': 'October 28, 2025 at 8:29 PM'
+  /// });
   /// ```
   factory CheckIn.fromJson(Map<String, dynamic> json) {
     try {
-      String timestampStr = json['timestamp'] ?? '';
-      DateTime dateTime = DateTime.parse(timestampStr).toLocal();
+      String createdAtStr = json['createdAt'] ?? '';
+      DateTime dateTime = DateTime.parse(createdAtStr).toLocal();
 
-      return CheckIn(timestamp: dateTime);
+      return CheckIn(
+        emoji: json['emoji'] ?? '',
+        textFeeling: json['textFeeling'] ?? '',
+        createdAt: dateTime,
+        checkInTime: json['checkInTime'] ?? '',
+      );
     } catch (e) {
-      throw FormatException("Invalid timestamp format: ${json['timestamp']}");
+      throw FormatException("Invalid check-in format: $e");
     }
   }
 
   /// **Converts a `CheckIn` object to a JSON-compatible map.**
   ///
-  /// - The timestamp is stored in **UTC format** (`ISO 8601`).
+  /// - The createdAt timestamp is stored in **UTC format** (`ISO 8601`).
   ///
   /// **Example Output:**
   /// ```json
-  /// { "timestamp": "2025-02-10T12:00:00Z" }
+  /// {
+  ///   "emoji": "😏",
+  ///   "textFeeling": "Feeling pretty smug",
+  ///   "createdAt": "2025-10-28T13:29:02.493Z",
+  ///   "checkInTime": "October 28, 2025 at 8:29 PM"
+  /// }
   /// ```
   Map<String, dynamic> toJson() {
     return {
-      'timestamp': timestamp.toUtc().toIso8601String(),
+      'emoji': emoji,
+      'textFeeling': textFeeling,
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'checkInTime': checkInTime,
     };
   }
 
@@ -51,10 +76,10 @@ class CheckIn {
   ///
   /// **Example Output:**
   /// ```
-  /// CheckIn(Timestamp: 2025-02-10 19:00:00.000)
+  /// CheckIn(Emoji: 😏, Time: 2025-10-28 19:00:00.000)
   /// ```
   @override
   String toString() {
-    return 'CheckIn(Timestamp: $timestamp)';
+    return 'CheckIn(Emoji: $emoji, Time: $createdAt)';
   }
 }
