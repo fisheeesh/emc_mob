@@ -26,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Provider.of<CheckInProvider>(context, listen: false).loadCheckInsFromDB();
   }
 
-  // DateTime _selectedDay = DateTime(2000, 1, 1);
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
 
@@ -52,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final userName = loginProvider.userName ?? "Guest";
     double topPadding =
         MediaQuery.of(context).size.height *
-        (EHelperFunctions.isIOS() ? 0.07 : 0.05);
+            (EHelperFunctions.isIOS() ? 0.07 : 0.05);
 
     return Scaffold(
       body: Padding(
@@ -90,14 +89,14 @@ class _HomeScreenState extends State<HomeScreen> {
       onPressed: checkInProvider.todayCheckIn != null
           ? null
           : () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      EmotionCheckInScreen(userName: userName),
-                ),
-              );
-            },
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                EmotionCheckInScreen(userName: userName),
+          ),
+        );
+      },
       placeholder: Text(
         ETexts.CHECK_IN,
         style: GoogleFonts.lexend(
@@ -125,59 +124,167 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: selectedDayCheckIn != null
           ? Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.only(
-                        top: 10,
-                        bottom: 10,
-                        right: 10,
-                        left: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F1F1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.login,
-                        color: EColors.primary,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          ETexts.CHECK_IN,
-                          style: ETextTheme.lightTextTheme.titleMedium,
-                        ),
-                        Text(
-                          /// Display user's selected day
-                          EHelperFunctions.getFormattedDate(
-                            selectedDayCheckIn.timestamp,
-                            'MMMM d, yyyy',
-                          ),
-                          style: ETextTheme.lightTextTheme.labelMedium,
-                        ),
-                      ],
-                    ),
-                  ],
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.only(
+                  top: 10,
+                  bottom: 10,
+                  right: 10,
+                  left: 4,
                 ),
-                Text(
-                  '${selectedDayCheckIn.timestamp.hour}:${selectedDayCheckIn.timestamp.minute.toString().padLeft(2, '0')}',
-                  style: ETextTheme.lightTextTheme.titleMedium,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F1F1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
-            )
-          : Center(
-              child: Text(
-                ETexts.NO_CHECK_IN,
-                style: ETextTheme.lightTextTheme.labelLarge,
+                child: Icon(
+                  Icons.login,
+                  color: EColors.primary,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ETexts.CHECK_IN,
+                    style: ETextTheme.lightTextTheme.titleMedium,
+                  ),
+                  Text(
+                    EHelperFunctions.getFormattedDate(
+                      selectedDayCheckIn.createdAt,
+                      'MMMM d, yyyy',
+                    ),
+                    style: ETextTheme.lightTextTheme.labelMedium,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          TextButton(
+            onPressed: () {
+              _showCheckInDetailsModal(context, selectedDayCheckIn);
+            },
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              'Details',
+              style: ETextTheme.lightTextTheme.titleMedium?.copyWith(
+                decoration: TextDecoration.underline,
+                color: EColors.black,
               ),
             ),
+          ),
+        ],
+      )
+          : Center(
+        child: Text(
+          ETexts.NO_CHECK_IN,
+          style: ETextTheme.lightTextTheme.labelLarge,
+        ),
+      ),
+    );
+  }
+
+  void _showCheckInDetailsModal(BuildContext context, dynamic checkIn) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: EColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ESizes.roundedSm),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Date and Time
+                Text(
+                  EHelperFunctions.getFormattedDate(
+                    checkIn.createdAt,
+                    'MMMM d, yyyy',
+                  ),
+                  style: GoogleFonts.lexend(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: EColors.dark,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${checkIn.createdAt.hour}:${checkIn.createdAt.minute.toString().padLeft(2, '0')}',
+                  style: GoogleFonts.lexend(
+                    fontSize: 16,
+                    color: EColors.dark.withOpacity(0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+
+                // Emoji
+                Text(
+                  checkIn.emoji,
+                  style: const TextStyle(fontSize: 48),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+
+                // Text Feeling
+                Text(
+                  checkIn.textFeeling.isNotEmpty
+                      ? checkIn.textFeeling
+                      : 'No description',
+                  style: GoogleFonts.lexend(
+                    fontSize: 16,
+                    color: EColors.dark,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 40),
+
+                // Close Button - aligned to the right
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: EColors.primary,
+                      side: BorderSide(color: EColors.primary, width: 1.5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Close',
+                      style: GoogleFonts.lexend(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: EColors.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -186,11 +293,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final checkInDates = checkInProvider.checkIns
         .map(
           (checkIn) => DateTime(
-            checkIn.timestamp.year,
-            checkIn.timestamp.month,
-            checkIn.timestamp.day,
-          ),
-        )
+        checkIn.createdAt.year,
+        checkIn.createdAt.month,
+        checkIn.createdAt.day,
+      ),
+    )
         .toSet();
 
     return Container(
@@ -368,43 +475,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<bool> _showLogoutConfirmationDialog(BuildContext context) async {
     return await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              backgroundColor: EColors.white,
-              title: Text(
-                ETexts.LOGOUT_TITLE,
-                style: ETextTheme.lightTextTheme.headlineMedium,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: EColors.white,
+          title: Text(
+            ETexts.LOGOUT_TITLE,
+            style: ETextTheme.lightTextTheme.headlineMedium,
+          ),
+          content: Text(
+            ETexts.LOGOUT_CONTENT,
+            style: ETextTheme.lightTextTheme.titleSmall,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                /// Dismiss the dialog and return false
+                Navigator.of(context).pop(false);
+              },
+              child: const Text(
+                ETexts.CANCEL,
+                style: TextStyle(color: EColors.black),
               ),
-              content: Text(
-                ETexts.LOGOUT_CONTENT,
-                style: ETextTheme.lightTextTheme.titleSmall,
+            ),
+            TextButton(
+              onPressed: () {
+                /// Dismiss the dialog and return true
+                Navigator.of(context).pop(true);
+              },
+              child: const Text(
+                ETexts.OK,
+                style: TextStyle(color: EColors.black),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    /// Dismiss the dialog and return false
-                    Navigator.of(context).pop(false);
-                  },
-                  child: const Text(
-                    ETexts.CANCEL,
-                    style: TextStyle(color: EColors.black),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    /// Dismiss the dialog and return true
-                    Navigator.of(context).pop(true);
-                  },
-                  child: const Text(
-                    ETexts.OK,
-                    style: TextStyle(color: EColors.black),
-                  ),
-                ),
-              ],
-            );
-          },
-        ) ??
+            ),
+          ],
+        );
+      },
+    ) ??
         false;
   }
 }
