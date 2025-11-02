@@ -1,5 +1,7 @@
 import 'package:emc_mob/components/buttons/custom_elevated_button.dart';
 import 'package:emc_mob/providers/check_in_provider.dart';
+import 'package:emc_mob/providers/emotion_provider.dart';
+import 'package:emc_mob/providers/login_provider.dart';
 import 'package:emc_mob/screens/main/check_in_success_screen.dart';
 import 'package:emc_mob/utils/constants/colors.dart';
 import 'package:emc_mob/utils/constants/sizes.dart';
@@ -34,42 +36,6 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
 
   bool isLoading = false;
 
-  /// List of emotions for each tab
-  final Map<int, List<Map<String, dynamic>>> _emotions = {
-    0: [
-      {'icon': '😓', 'label': 'tired'},
-      {'icon': '😩', 'label': 'stressed'},
-      {'icon': '😴', 'label': 'bored'},
-      {'icon': '😡', 'label': 'frustrated'},
-      {'icon': '😞', 'label': 'disappointed'},
-      {'icon': '😭', 'label': 'sad'},
-      {'icon': '😰', 'label': 'anxious'},
-      {'icon': '😒', 'label': 'annoyed'},
-      {'icon': '😠', 'label': 'mad'},
-    ],
-    1: [
-      {'icon': '😐', 'label': 'neutral'},
-      {'icon': '😌', 'label': 'calm'},
-      {'icon': '😑', 'label': 'meh'},
-      {'icon': '😶', 'label': 'indifferent'},
-      {'icon': '🙂', 'label': 'okay'},
-      {'icon': '😕', 'label': 'unsure'},
-      {'icon': '🤔', 'label': 'curious'},
-      {'icon': '🙃', 'label': 'playful'},
-      {'icon': '🫤', 'label': 'uncertain'},
-    ],
-    2: [
-      {'icon': '😀', 'label': 'happy'},
-      {'icon': '😄', 'label': 'excited'},
-      {'icon': '😍', 'label': 'loved'},
-      {'icon': '😁', 'label': 'joyful'},
-      {'icon': '🥳', 'label': 'celebratory'},
-      {'icon': '😎', 'label': 'confident'},
-      {'icon': '😊', 'label': 'grateful'},
-      {'icon': '🤩', 'label': 'thrilled'},
-      {'icon': '😇', 'label': 'peaceful'},
-    ],
-  };
   static const int _maxCharacters = 100;
   int _currentCharacterCount = 0;
 
@@ -77,6 +43,21 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
   void initState() {
     super.initState();
     _feelingController.addListener(_updateCharacterCount);
+    _loadEmotions();
+  }
+
+  /// Load emotions instantly from cache/fallback and sync in background
+  Future<void> _loadEmotions() async {
+    final emotionProvider = context.read<EmotionProvider>();
+    final loginProvider = context.read<LoginProvider>();
+
+    // Load instantly from cache/fallback (no delay)
+    await emotionProvider.loadEmotions();
+
+    // Sync in background if user is logged in
+    if (loginProvider.accessToken != null) {
+      emotionProvider.syncInBackground(loginProvider.accessToken);
+    }
   }
 
   @override
@@ -94,7 +75,9 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double topPadding = MediaQuery.of(context).size.height * (EHelperFunctions.isIOS() ? 0.07 : 0.05);
+    final emotionProvider = context.watch<EmotionProvider>();
+    double topPadding = MediaQuery.of(context).size.height *
+        (EHelperFunctions.isIOS() ? 0.07 : 0.05);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -102,7 +85,10 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
         body: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(
-                    left: ESizes.md, right: ESizes.md, top: topPadding),
+              left: ESizes.md,
+              right: ESizes.md,
+              top: topPadding,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -129,13 +115,11 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                       // Tab Bar
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: _tabBarSection(),
+                        child: _tabBarSection(emotionProvider),
                       ),
-                      SizedBox(
-                        height: 20,
-                      ),
+                      const SizedBox(height: 20),
                       // Emoji Grid
-                      _emojiGridSection(),
+                      _emojiGridSection(emotionProvider),
                     ],
                   ),
                 ),
@@ -145,6 +129,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                 _feelingTextField(),
 
                 SizedBox(height: EHelperFunctions.isIOS() ? 25 : 22),
+
                 /// submit button
                 _submitButton(),
               ],
@@ -182,15 +167,15 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
               hintText: ETexts.HINT,
               counterText: '',
               hintStyle: GoogleFonts.lexend(
-                textStyle: TextStyle(color: EColors.grey, fontSize: 16),
+                textStyle: const TextStyle(color: EColors.grey, fontSize: 16),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(ESizes.roundedXs),
-                borderSide: BorderSide(color: EColors.lightBlue, width: 2),
+                borderSide: const BorderSide(color: EColors.lightBlue, width: 2),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(ESizes.roundedXs),
-                borderSide: BorderSide(color: EColors.lightBlue, width: 2),
+                borderSide: const BorderSide(color: EColors.lightBlue, width: 2),
               ),
             ),
           ),
@@ -202,7 +187,9 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
             child: Text(
               "$_currentCharacterCount/$_maxCharacters",
               style: TextStyle(
-                color: _currentCharacterCount >= 90 ? EColors.danger : EColors.grey,
+                color: _currentCharacterCount >= 90
+                    ? EColors.danger
+                    : EColors.grey,
                 fontSize: 14,
               ),
             ),
@@ -245,7 +232,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
           ? Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 18,
             width: 18,
             child: CircularProgressIndicator(
@@ -257,7 +244,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
           Text(
             ETexts.SUBMITTING,
             style: GoogleFonts.lexend(
-              textStyle: TextStyle(
+              textStyle: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
                 color: EColors.white,
@@ -269,7 +256,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
           : Text(
         ETexts.SUBMIT,
         style: GoogleFonts.lexend(
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
             color: EColors.white,
@@ -297,25 +284,40 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
     );
   }
 
-  Widget _tabBarSection() {
+  Widget _tabBarSection(EmotionProvider emotionProvider) {
+    final categories = emotionProvider.categories;
+
+    if (categories.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.transparent,
-        border: Border.all(color: Color(0xFFBAD6FE), width: 1.5),
+        border: Border.all(color: const Color(0xFFBAD6FE), width: 1.5),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildTabItem(0, "Negative", isFirst: true),
-          _buildTabItem(1, "Neutral"),
-          _buildTabItem(2, "Positive", isLast: true),
-        ],
+        children: List.generate(
+          categories.length,
+              (index) => _buildTabItem(
+            index,
+            categories[index].title,
+            isFirst: index == 0,
+            isLast: index == categories.length - 1,
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildTabItem(int index, String label, {bool isFirst = false, bool isLast = false}) {
+  Widget _buildTabItem(
+      int index,
+      String label, {
+        bool isFirst = false,
+        bool isLast = false,
+      }) {
     final isSelected = _selectedTabIndex == index;
 
     return Expanded(
@@ -324,12 +326,15 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
           setState(() {
             _selectedTabIndex = index;
             _selectedEmotion = null;
+            _selectedLabel = null;
           });
         },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? Color(0xFFBAD6FE) : Color(0xFFF7F8F8),
+            color: isSelected
+                ? const Color(0xFFBAD6FE)
+                : const Color(0xFFF7F8F8),
             borderRadius: BorderRadius.horizontal(
               left: isFirst ? const Radius.circular(20) : Radius.zero,
               right: isLast ? const Radius.circular(20) : Radius.zero,
@@ -340,9 +345,11 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
             label,
             style: GoogleFonts.lexend(
               textStyle: TextStyle(
-                color: isSelected ? Color(0xFF3085FE) : Color(0xFF87878B),
+                color: isSelected
+                    ? const Color(0xFF3085FE)
+                    : const Color(0xFF87878B),
                 fontSize: 14,
-              )
+              ),
             ),
           ),
         ),
@@ -350,14 +357,41 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
     );
   }
 
-  Widget _emojiGridSection() {
-    final emotions = _emotions[_selectedTabIndex]!;
+  Widget _emojiGridSection(EmotionProvider emotionProvider) {
+    final categories = emotionProvider.categories;
+
+    // Handle empty or invalid state
+    if (categories.isEmpty || _selectedTabIndex >= categories.length) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text(
+            'No emotions available',
+            style: TextStyle(color: EColors.grey),
+          ),
+        ),
+      );
+    }
+
+    final emotions = categories[_selectedTabIndex].emotions;
+
+    if (emotions.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text(
+            'No emotions in this category',
+            style: TextStyle(color: EColors.grey),
+          ),
+        ),
+      );
+    }
 
     return GridView.builder(
       padding: EdgeInsets.zero,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 1,
         mainAxisSpacing: 1,
@@ -366,13 +400,13 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
       itemCount: emotions.length,
       itemBuilder: (context, index) {
         final emotion = emotions[index];
-        final isSelected = _selectedEmotion == emotion['icon'];
+        final isSelected = _selectedEmotion == emotion.icon;
 
         return GestureDetector(
           onTap: () {
             setState(() {
-              _selectedLabel = emotion['label'];
-              _selectedEmotion = emotion['icon'];
+              _selectedLabel = emotion.label;
+              _selectedEmotion = emotion.icon;
             });
           },
           child: Container(
@@ -389,11 +423,11 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  emotion['icon'],
+                  emotion.icon,
                   style: const TextStyle(fontSize: 28),
                 ),
                 Text(
-                  emotion['label'],
+                  emotion.label,
                   style: const TextStyle(fontSize: 12),
                 ),
               ],

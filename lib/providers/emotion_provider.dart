@@ -17,7 +17,7 @@ class EmotionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sync in background (no UI blocking)
+  /// Sync in background
   Future<void> syncInBackground(String? accessToken) async {
     if (accessToken == null) {
       print('No access token available, skipping sync');
