@@ -1,15 +1,11 @@
 import 'package:emc_mob/providers/check_in_provider.dart';
+import 'package:emc_mob/providers/emotion_provider.dart';
 import 'package:emc_mob/providers/login_provider.dart';
-import 'package:emc_mob/screens/auth/login_screen.dart';
-import 'package:emc_mob/screens/main/home_screen.dart';
-import 'package:emc_mob/screens/onBoard/on_boarding_screen.dart';
+import 'package:emc_mob/screens/splash/animated_splash_screen.dart';
 import 'package:emc_mob/utils/theme/index.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:emc_mob/database/db_helper.dart';
-
-int? isViewed;
 
 /// The entry point of the ATA-EmotionCheck-in application.
 ///
@@ -20,10 +16,6 @@ void main() async {
 
   /// Initialize the SQLite database before the app starts.
   await DatabaseHelper.instance.database;
-
-  /// Retrieve shared preferences to check if the onboarding screen has been viewed.
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  isViewed = prefs.getInt('onBoard');
 
   final loginProvider = LoginProvider();
   final checkInProvider = CheckInProvider();
@@ -42,15 +34,15 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => loginProvider),
         ChangeNotifierProvider(create: (_) => checkInProvider),
+        ChangeNotifierProvider(create: (_) => EmotionProvider()),
       ],
-      child: MyApp(isUserLoggedIn: isUserLoggedIn),
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  final bool isUserLoggedIn;
-  MyApp({super.key, required this.isUserLoggedIn});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +50,7 @@ class MyApp extends StatelessWidget {
       title: 'ATA - Emotion Check-in Application',
       theme: EAppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: isViewed != 0
-          ? OnBoardingScreen()
-          : isUserLoggedIn
-          ? const HomeScreen()
-          : const LoginScreen(),
+      home: const AnimatedSplashScreen(),
     );
   }
 }
