@@ -7,7 +7,7 @@ import 'package:emc_mob/utils/constants/urls.dart';
 import 'package:emc_mob/utils/helpers/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../models/check_in.dart';
+import '../models/check_in_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 

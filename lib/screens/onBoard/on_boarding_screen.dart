@@ -7,6 +7,7 @@ import 'package:emc_mob/utils/constants/text_strings.dart';
 import 'package:emc_mob/utils/helpers/index.dart';
 import 'package:emc_mob/utils/theme/text_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -196,7 +197,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   Padding _pageViewSection() {
-    double topPadding = MediaQuery.of(context).size.height * 0.30;
+    double topPadding = EHelperFunctions.getProportionateHeight(context, 0.33);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -223,16 +224,30 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     );
   }
 
-  Padding _logoSection() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: ESizes.xl,
-        left: ESizes.xl,
-        right: ESizes.xl,
-      ),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Image.asset(EImages.ataLogo),
+  Widget _logoSection() {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: const EdgeInsets.only(top: ESizes.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Logo
+            Image.asset(
+              EImages.ataLogo,
+              width: 260,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              'Emotion Check-In Application',
+              style: GoogleFonts.michroma(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

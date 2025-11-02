@@ -10,6 +10,7 @@ import 'package:emc_mob/utils/validators/index.dart';
 import 'package:flutter/material.dart';
 import 'package:emc_mob/utils/theme/text_theme.dart';
 import 'package:emc_mob/utils/constants/sizes.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -191,7 +192,28 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Image _logoSection() {
-    return Image.asset(EImages.ataLogo, height: ESizes.hNormal);
+  Widget _logoSection() {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Logo
+          Image.asset(
+            EImages.ataLogo,
+            width: 260,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 5),
+          Text(
+            'Emotion Check-In Application',
+            style: GoogleFonts.michroma(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

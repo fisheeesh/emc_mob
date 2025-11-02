@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import '../models/check_in.dart';
+import '../models/check_in_model.dart';
 
 /// A singleton class that manages the SQLite database for check-in records.
 ///
