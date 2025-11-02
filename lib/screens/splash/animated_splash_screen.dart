@@ -25,7 +25,6 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
   void initState() {
     super.initState();
 
-    // Initialize animations
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -47,22 +46,21 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
 
     _controller.forward();
 
-    // Navigate after animation and initialization
+    /// Navigate after animation and initialization
     _initializeAndNavigate();
   }
 
   Future<void> _initializeAndNavigate() async {
-    // Wait for animation to complete
     await Future.delayed(const Duration(milliseconds: 2500));
 
     if (!mounted) return;
 
-    // Check onboarding status and user login
+    /// Check onboarding status and user login
     final prefs = await SharedPreferences.getInstance();
     final isViewed = prefs.getInt('onBoard');
     final loginProvider = Provider.of<LoginProvider>(context, listen: false);
 
-    // Determine which screen to navigate to
+    /// Determine which screen to navigate to
     Widget nextScreen;
     if (isViewed != 0) {
       nextScreen = OnBoardingScreen();
@@ -72,7 +70,6 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
       nextScreen = const LoginScreen();
     }
 
-    // Navigate with fade transition
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
@@ -117,7 +114,6 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Logo
         Image.asset(
           EImages.ataLogo,
           width: 260,

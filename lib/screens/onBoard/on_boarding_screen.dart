@@ -232,7 +232,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Logo
             Image.asset(
               EImages.ataLogo,
               width: 260,

@@ -11,7 +11,6 @@ class EmotionProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get hasError => _hasError;
 
-  /// Load emotions instantly from cache/fallback
   Future<void> loadEmotions() async {
     _categories = await EmotionService.getEmotionsInstant();
     notifyListeners();
@@ -25,12 +24,11 @@ class EmotionProvider with ChangeNotifier {
     }
 
     await EmotionService.syncEmotionsInBackground(accessToken);
-    // Reload from cache after sync
+    /// Reload from cache after sync
     _categories = await EmotionService.getEmotionsInstant();
     notifyListeners();
   }
 
-  /// Manual refresh with loading indicator
   Future<void> refresh(String? accessToken) async {
     if (accessToken == null) {
       print('No access token available, cannot refresh');
@@ -53,7 +51,6 @@ class EmotionProvider with ChangeNotifier {
     }
   }
 
-  /// Get emotions by category title
   List<Map<String, dynamic>> getEmotionsByCategory(String categoryTitle) {
     final category = _categories.firstWhere(
           (cat) => cat.title.toLowerCase() == categoryTitle.toLowerCase(),
@@ -65,7 +62,6 @@ class EmotionProvider with ChangeNotifier {
         .toList();
   }
 
-  /// Get category index by title
   int getCategoryIndex(String categoryTitle) {
     return _categories.indexWhere(
           (cat) => cat.title.toLowerCase() == categoryTitle.toLowerCase(),

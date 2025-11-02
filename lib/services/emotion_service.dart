@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:emc_mob/models/emotion_model.dart';
-import 'package:emc_mob/utils/helpers/index.dart';
 import 'package:emc_mob/utils/constants/urls.dart';
 
 class EmotionService {
@@ -10,7 +9,7 @@ class EmotionService {
   static const String _cacheTimeKey = 'emotion_categories_cache_time';
   static const Duration _cacheDuration = Duration(hours: 24);
 
-  // Hardcoded fallback data
+  /// Hardcoded fallback data
   static final List<EmotionCategory> _fallbackCategories = [
     EmotionCategory(
       title: 'Negative',
@@ -56,7 +55,7 @@ class EmotionService {
     ),
   ];
 
-  /// Get emotions from cache or fallback (instant - no API call)
+  /// Get emotions from cache or fallback -> instant - no API call
   static Future<List<EmotionCategory>> getEmotionsInstant() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -70,16 +69,16 @@ class EmotionService {
       print('Error loading cached emotions: $e');
     }
 
-    // Return fallback if no cache
+    /// Return fallback if no cache
     return _fallbackCategories;
   }
 
-  /// Fetch from API and update cache (background operation)
+  /// Fetch from API and update cache -> background operation
   static Future<void> syncEmotionsInBackground(String accessToken) async {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      // Check if cache is still fresh
+      /// Check if cache is still fresh
       final cacheTimeStr = prefs.getString(_cacheTimeKey);
       if (cacheTimeStr != null) {
         final cacheTime = DateTime.parse(cacheTimeStr);
@@ -89,12 +88,8 @@ class EmotionService {
         }
       }
 
-      // Fetch from API
       final response = await http.get(
-        Uri.parse(EHelperFunctions.isIOS()
-            ? EUrls.EMOTION_ENDPOINT_IOS
-            : EUrls.EMOTION_ENDPOINT_ANDROID
-        ),
+        Uri.parse(EUrls.EMOTION_CATEGORIES_ENDPOINT),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
@@ -106,7 +101,7 @@ class EmotionService {
         final data = json.decode(response.body);
         final List<dynamic> categories = data['data'];
 
-        // Save to cache
+        /// Save to cache
         await prefs.setString(_cacheKey, json.encode(categories));
         await prefs.setString(_cacheTimeKey, DateTime.now().toIso8601String());
 
@@ -116,18 +111,13 @@ class EmotionService {
       }
     } catch (e) {
       print('Error syncing emotions: $e');
-      // Silently fail - app will continue using cached/fallback data
     }
   }
 
-  /// Force refresh (for manual refresh)
   static Future<List<EmotionCategory>> forceRefresh(String accessToken) async {
     try {
       final response = await http.get(
-        Uri.parse(EHelperFunctions.isIOS()
-            ? EUrls.EMOTION_ENDPOINT_IOS
-            : EUrls.EMOTION_ENDPOINT_ANDROID
-        ),
+        Uri.parse(EUrls.EMOTION_CATEGORIES_ENDPOINT),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
@@ -139,7 +129,7 @@ class EmotionService {
         final data = json.decode(response.body);
         final List<dynamic> categories = data['data'];
 
-        // Save to cache
+        /// Save to cache
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_cacheKey, json.encode(categories));
         await prefs.setString(_cacheTimeKey, DateTime.now().toIso8601String());
@@ -150,11 +140,9 @@ class EmotionService {
       print('Error force refreshing emotions: $e');
     }
 
-    // Return cached or fallback on error
     return await getEmotionsInstant();
   }
 
-  /// Clear cache
   static Future<void> clearCache() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_cacheKey);

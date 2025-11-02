@@ -28,7 +28,6 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
   /// Tracks the selected tab (0: Negative, 1: Neutral, 2: Positive)
   int _selectedTabIndex = 1;
 
-  /// Tracks the selected emotion (only one can be selected)
   String? _selectedEmotion;
 
   String? _selectedLabel;
@@ -51,10 +50,10 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
     final emotionProvider = context.read<EmotionProvider>();
     final loginProvider = context.read<LoginProvider>();
 
-    // Load instantly from cache/fallback (no delay)
+    /// Load instantly from cache/fallback (no delay)
     await emotionProvider.loadEmotions();
 
-    // Sync in background if user is logged in
+    /// Sync in background if user is logged in
     if (loginProvider.accessToken != null) {
       emotionProvider.syncInBackground(loginProvider.accessToken);
     }
@@ -360,7 +359,6 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
   Widget _emojiGridSection(EmotionProvider emotionProvider) {
     final categories = emotionProvider.categories;
 
-    // Handle empty or invalid state
     if (categories.isEmpty || _selectedTabIndex >= categories.length) {
       return const Center(
         child: Padding(

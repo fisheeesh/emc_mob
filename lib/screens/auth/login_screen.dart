@@ -28,18 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordVisible = false;
   bool isLoading = false;
 
-  /// Handles the login process when the user submits the form.
-  ///
-  /// This method:
-  /// - Validates the form fields.
-  /// - Calls `loginWithEmailAndPassword()` from `LoginProvider` to authenticate the user.
-  /// - Updates the UI to show/hide the loading indicator.
-  /// - If login is successful, navigates to the `HomeScreen`.
-  /// - If login fails, it logs an error message.
-  ///
-  /// Effects:
-  /// - Uses `setState()` to manage the `isLoading` state.
-  /// - Calls `EHelperFunctions.navigateToScreen()` upon successful login.
   void _handleLogin() async {
     /// Validate form input fields before proceeding
     if (_formKey.currentState?.validate() ?? false) {
@@ -50,19 +38,17 @@ class _LoginScreenState extends State<LoginScreen> {
         isLoading = true;
       });
 
-      // Attempt to log in with user-provided email and password
+      /// Log in with user-provided email and password
       bool success = await loginProvider.loginWithEmailAndPassword(
         context,
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      // Hide loading indicator after login attempt
       setState(() {
         isLoading = false;
       });
 
-      // Handle login result
       if (success) {
         debugPrint("Login Successful!");
         EHelperFunctions.navigateToScreen(context, HomeScreen());
@@ -132,7 +118,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 10),
 
                         /// Forgot Password
-                        // _forgotPasswordSection(),
                         const SizedBox(height: 10),
 
                         /// Login Button
@@ -154,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
 
-        /// Full-Screen Loading Overlay**
+        /// Full-Screen Loading Overlay
         if (isLoading)
           Container(
             color: Colors.black.withOpacity(0.5),
@@ -166,21 +151,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
       ],
-    );
-  }
-
-  Align _forgotPasswordSection() {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: TextButton(
-        onPressed: () {
-          // Handle forgot password logic
-        },
-        child: const Text(
-          ETexts.FORGOTPW,
-          style: TextStyle(color: EColors.grey),
-        ),
-      ),
     );
   }
 
@@ -198,7 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Logo
           Image.asset(
             EImages.ataLogo,
             width: 260,

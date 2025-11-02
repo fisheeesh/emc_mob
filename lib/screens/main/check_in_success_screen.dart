@@ -78,7 +78,7 @@ class CheckInSuccessScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Time
+          /// Check-in Time
           Text(ETexts.TIME, style: ETextTheme.lightTextTheme.labelMedium),
           const SizedBox(height: 10),
           Text(
@@ -91,13 +91,10 @@ class CheckInSuccessScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          /// Emoji and Emotion Text
+          /// Emoji
           Column(
             children: [
               Text(emoji, style: TextStyle(fontSize: 40)),
-
-              Text(label, style: ETextTheme.lightTextTheme.labelLarge),
-              const SizedBox(height: 20),
 
               /// Feeling Text
               Text(

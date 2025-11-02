@@ -11,8 +11,6 @@ import '../models/check_in_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
-/// **CheckInProvider** manages user check-in data, API requests, and local database storage.
-///
 /// This provider:
 /// - Fetches check-ins from the server.
 /// - Stores check-ins locally using SQLite.
@@ -22,26 +20,11 @@ import 'package:provider/provider.dart';
 class CheckInProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  /// SQLite database helper instance for managing local storage.
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   List<CheckIn> _checkIns = [];
   List<CheckIn> get checkIns => _checkIns;
 
-  /// **Makes an authorized HTTP request with the stored token.**
-  ///
-  /// Backend handles token refresh automatically via auth middleware.
-  /// If tokens are rotated, they're returned in response headers.
-  ///
-  /// **Parameters:**
-  /// - `context`: BuildContext for accessing LoginProvider
-  /// - `method`: HTTP method (`"GET"` or `"POST"`).
-  /// - `endpoint`: API endpoint URL.
-  /// - `body`: Optional request body for `POST` requests.
-  ///
-  /// **Returns:**
-  /// - `http.Response` if the request is successful.
-  /// - `null` if authentication fails or an error occurs.
   Future<http.Response?> _makeAuthorizedRequest({
     required BuildContext context,
     required String method,
@@ -58,13 +41,12 @@ class CheckInProvider with ChangeNotifier {
       return null;
     }
 
-    // Remove "Bearer " prefix if exists
     accessToken = accessToken.trim();
     if (accessToken.startsWith("Bearer ")) {
       accessToken = accessToken.substring(7);
     }
 
-    // Prepare request headers
+    /// Prepare headers
     final headers = {
       "Authorization": "Bearer $accessToken",
       "Content-Type": "application/json",
@@ -89,7 +71,6 @@ class CheckInProvider with ChangeNotifier {
         return null;
       }
 
-      // Check if backend rotated tokens (will be in response headers)
       if (context.mounted) {
         await context
             .read<LoginProvider>()
@@ -103,20 +84,12 @@ class CheckInProvider with ChangeNotifier {
     }
   }
 
-  /// **Fetches check-ins from the API after login.**
-  ///
-  /// - Retrieves check-ins from the server.
-  /// - Backend returns: { message: string, data: array }
-  /// - Saves them to SQLite for offline access.
   Future<void> fetchCheckIns() async {
     debugPrint("fetchCheckIns called - waiting for context");
   }
 
-  /// **Fetches check-ins with BuildContext**
   Future<void> fetchCheckInsWithContext(BuildContext context) async {
-    final endpoint = EHelperFunctions.isIOS()
-        ? EUrls.HISTORY_ENDPOINT_IOS
-        : EUrls.HISTORY_ENDPOINT_ANDROID;
+    final endpoint = EUrls.HISTORY_ENDPOINT;
 
     final response = await _makeAuthorizedRequest(
       context: context,
@@ -128,12 +101,10 @@ class CheckInProvider with ChangeNotifier {
       try {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
 
-        // Backend returns: { message: "...", data: [...] }
         final List<dynamic> data = jsonResponse['data'] ?? [];
 
         _checkIns = data.map((item) => CheckIn.fromJson(item)).toList();
 
-        // Save Check-Ins to SQLite
         await _dbHelper.clearCheckIns();
         for (var checkIn in _checkIns) {
           await _dbHelper.insertCheckIn(checkIn);
@@ -149,23 +120,11 @@ class CheckInProvider with ChangeNotifier {
     }
   }
 
-  /// **Load Check-Ins From SQLite for Home Screen**
   Future<void> loadCheckInsFromDB() async {
     _checkIns = await _dbHelper.getCheckIns();
     notifyListeners();
   }
 
-  /// **Submits a new check-in to the API.**
-  ///
-  /// - Sends check-in with format: emoji(I'm label) // textFeeling
-  /// - Backend expects: { moodMessage: "😊(I'm happy) // I feel great today." }
-  /// - Stores the check-in in SQLite for offline access.
-  ///
-  /// **Parameters:**
-  /// - `context`: The current `BuildContext`.
-  /// - `emoji`: The emoji representing the mood.
-  /// - `label`: The label representing the mood (e.g., "happy", "sad").
-  /// - `feelingText`: The text description of the mood.
   Future<bool> sendCheckIn(
       BuildContext context,
       String emoji,
@@ -174,9 +133,7 @@ class CheckInProvider with ChangeNotifier {
       ) async {
     String moodMessage = "$emoji(I'm $label) // $feelingText";
 
-    final endpoint = EHelperFunctions.isIOS()
-        ? EUrls.CHECK_IN_ENDPOINT_IOS
-        : EUrls.CHECK_IN_ENDPOINT_ANDROID;
+    final endpoint = EUrls.CHECK_IN_ENDPOINT;
 
     final response = await _makeAuthorizedRequest(
       context: context,
@@ -196,7 +153,7 @@ class CheckInProvider with ChangeNotifier {
         checkInTime: checkInTime,
       );
 
-      // Save Check-In to SQLite
+      /// Save Check-In to SQLite
       _checkIns.add(checkIn);
       await _dbHelper.insertCheckIn(checkIn);
 
@@ -212,16 +169,12 @@ class CheckInProvider with ChangeNotifier {
     }
   }
 
-  /// **Clears all stored check-in data after Logout.**
   Future<void> clearData() async {
     await _dbHelper.clearCheckIns();
     _checkIns.clear();
     notifyListeners();
   }
 
-  /// **Retrieves a check-in for a specific date.**
-  ///
-  /// **Returns:** A `CheckIn` object if found, otherwise `null`.
   CheckIn? getCheckInByDate(DateTime date) {
     return _checkIns.cast<CheckIn?>().firstWhere(
           (checkIn) =>
@@ -232,9 +185,6 @@ class CheckInProvider with ChangeNotifier {
     );
   }
 
-  /// **Retrieves today's check-in.**
-  ///
-  /// **Returns:** The `CheckIn` object if found, otherwise `null`.
   CheckIn? get todayCheckIn {
     final today = DateTime.now();
     return _checkIns.cast<CheckIn?>().firstWhere(
